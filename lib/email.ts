@@ -158,6 +158,177 @@ function renderAdminEmailText(p: BookingEmailPayload): string {
   ].join("\n");
 }
 
+// ---------------------------------------------------------------------------
+// Zoom link email — sent when admin adds a Zoom link to a booking
+// ---------------------------------------------------------------------------
+export type ZoomLinkEmailPayload = {
+  studentName: string;
+  studentEmail: string;
+  teacherName: string;
+  selectedSlot: string;
+  zoomLink: string;
+};
+
+export async function sendZoomLinkEmail(payload: ZoomLinkEmailPayload) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping zoom link email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: "Your QuranSphere Class is Confirmed — Zoom Link Inside",
+    html: renderZoomLinkEmail(payload),
+    text: renderZoomLinkEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderZoomLinkEmail(p: ZoomLinkEmailPayload): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px 32px 0">
+        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">QuranSphere</h1>
+      </td></tr>
+      <tr><td style="padding:24px 32px">
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName)},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Your trial class has been confirmed!</p>
+
+        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:16px;overflow:hidden;background:#ECFDF5">
+          ${row("Teacher", escapeHtml(p.teacherName))}
+          ${row("Time", escapeHtml(p.selectedSlot))}
+        </table>
+
+        <p style="margin:24px 0;text-align:center">
+          <a href="${escapeHtml(p.zoomLink)}" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Join Zoom Class</a>
+        </p>
+        <p style="margin:0 0 16px;font-size:13px;color:#64748B;word-break:break-all">Or copy this link: ${escapeHtml(p.zoomLink)}</p>
+
+        <p style="margin:24px 0 0;font-size:15px">See you in class!<br/><strong>The QuranSphere Team</strong></p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderZoomLinkEmailText(p: ZoomLinkEmailPayload): string {
+  return [
+    `Assalamu Alaikum ${p.studentName},`,
+    ``,
+    `Your trial class has been confirmed!`,
+    ``,
+    `Teacher: ${p.teacherName}`,
+    `Time: ${p.selectedSlot}`,
+    ``,
+    `Join Zoom: ${p.zoomLink}`,
+    ``,
+    `See you in class!`,
+    `The QuranSphere Team`,
+  ].join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Teacher application — approved / rejected
+// ---------------------------------------------------------------------------
+export type ApplicationEmailPayload = {
+  name: string;
+  email: string;
+  subject: string;
+};
+
+export async function sendApplicationApprovedEmail(
+  payload: ApplicationEmailPayload
+) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping approval email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.email,
+    subject: "Welcome to QuranSphere — Your Application is Approved",
+    html: renderApprovalEmail(payload),
+    text: renderApprovalEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+export async function sendApplicationRejectedEmail(
+  payload: ApplicationEmailPayload
+) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping rejection email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.email,
+    subject: "QuranSphere — Update on Your Teacher Application",
+    html: renderRejectionEmail(payload),
+    text: renderRejectionEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderApprovalEmail(p: ApplicationEmailPayload): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px">
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">Welcome to QuranSphere</h1>
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.name)},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Alhamdulillah — your application to teach <strong>${escapeHtml(p.subject)}</strong> on QuranSphere has been <strong style="color:#0F766E">approved</strong>!</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Our onboarding team will reach out within 48 hours with next steps: profile setup, availability calendar, and your first student matches.</p>
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The QuranSphere Team</strong></p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderApprovalEmailText(p: ApplicationEmailPayload): string {
+  return [
+    `Assalamu Alaikum ${p.name},`,
+    ``,
+    `Your application to teach ${p.subject} on QuranSphere has been approved!`,
+    ``,
+    `Our onboarding team will reach out within 48 hours with next steps: profile setup, availability calendar, and your first student matches.`,
+    ``,
+    `JazakAllah Khair,`,
+    `The QuranSphere Team`,
+  ].join("\n");
+}
+
+function renderRejectionEmail(p: ApplicationEmailPayload): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px">
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:22px;font-weight:700">QuranSphere</h1>
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.name)},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Thank you for applying to teach on QuranSphere. After careful review of your application, we are unable to move forward at this time.</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">We receive many qualified applications and this decision is not a reflection of your skills as a teacher. You are welcome to apply again in the future as our needs change.</p>
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair for your interest,<br/><strong>The QuranSphere Team</strong></p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderRejectionEmailText(p: ApplicationEmailPayload): string {
+  return [
+    `Assalamu Alaikum ${p.name},`,
+    ``,
+    `Thank you for applying to teach on QuranSphere. After careful review of your application, we are unable to move forward at this time.`,
+    ``,
+    `We receive many qualified applications and this decision is not a reflection of your skills as a teacher. You are welcome to apply again in the future as our needs change.`,
+    ``,
+    `JazakAllah Khair for your interest,`,
+    `The QuranSphere Team`,
+  ].join("\n");
+}
+
 function row(label: string, value: string) {
   return `<tr>
     <td style="padding:10px 14px;font-size:13px;color:#64748B;border-bottom:1px solid #E2E8E5;width:40%">${label}</td>
