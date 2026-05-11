@@ -93,3 +93,12 @@ export type TeacherFilters = {
   is_featured?: boolean;
   language?: string;
 };
+
+export type StudentProfile = {
+  email: string;
+  name: string;
+  phone: string;
+  country: string;
+  age_group: "" | AgeGroup;
+  updated_at: string;
+};

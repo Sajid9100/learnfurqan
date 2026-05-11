@@ -10,7 +10,10 @@ import {
   Send,
   ArrowLeft,
   ChevronDown,
+  LayoutDashboard,
+  UserPlus,
 } from "lucide-react";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Teacher, AgeGroup, StudentLevel as Level } from "@/lib/types";
@@ -522,23 +525,42 @@ function BookingSuccess({ email }: { email: string }) {
         hours. The teacher will confirm your slot shortly.
       </p>
 
-      <div className="mx-auto mt-7 flex max-w-md flex-col gap-2 sm:flex-row">
-        <Link href="/teachers" className="contents">
-          <Button variant="outline" size="lg" className="w-full">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Teachers
-          </Button>
-        </Link>
-        <a
-          href={`https://wa.me/?text=${shareText}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="contents"
-        >
-          <Button variant="primary" size="lg" className="w-full">
-            Share on WhatsApp
-          </Button>
-        </a>
+      <div className="mx-auto mt-7 flex max-w-md flex-col gap-2">
+        <SignedIn>
+          <Link href="/dashboard" className="contents">
+            <Button variant="primary" size="lg" className="w-full">
+              <LayoutDashboard className="h-4 w-4" />
+              Go to Dashboard
+            </Button>
+          </Link>
+        </SignedIn>
+        <SignedOut>
+          <Link href="/sign-up" className="contents">
+            <Button variant="primary" size="lg" className="w-full">
+              <UserPlus className="h-4 w-4" />
+              Create account to track your class
+            </Button>
+          </Link>
+        </SignedOut>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link href="/teachers" className="contents">
+            <Button variant="outline" size="lg" className="w-full">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Teachers
+            </Button>
+          </Link>
+          <a
+            href={`https://wa.me/?text=${shareText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contents"
+          >
+            <Button variant="outline" size="lg" className="w-full">
+              Share on WhatsApp
+            </Button>
+          </a>
+        </div>
       </div>
     </motion.div>
   );

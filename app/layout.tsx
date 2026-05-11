@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const inter = Inter({
@@ -40,11 +41,26 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
+  const tree = (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}
       </body>
     </html>
+  );
+
+  return (
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#0F766E",
+          colorText: "#0F172A",
+          borderRadius: "0.75rem",
+          fontFamily: "var(--font-inter), system-ui, sans-serif",
+        },
+      }}
+    >
+      {tree}
+    </ClerkProvider>
   );
 }

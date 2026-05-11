@@ -116,6 +116,23 @@ create index if not exists teacher_applications_email_idx on teacher_application
 create index if not exists teacher_applications_status_idx on teacher_applications (status);
 
 -- ============================================================
+-- STUDENT PROFILES — editable fields for logged-in students
+-- Keyed on the lowercase Clerk-verified email so we don't need
+-- to migrate when Clerk user IDs change.
+-- ============================================================
+create table if not exists student_profiles (
+  email        text primary key,
+  name         text default '',
+  phone        text default '',
+  country      text default '',
+  age_group    text default '',
+  updated_at   timestamptz default now()
+);
+
+create index if not exists student_profiles_updated_at_idx
+  on student_profiles (updated_at desc);
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- Public site reads active teachers; everything else is locked
 -- behind the service role (used by server-side API routes).
@@ -124,6 +141,7 @@ alter table teachers enable row level security;
 alter table bookings enable row level security;
 alter table subscriptions enable row level security;
 alter table teacher_applications enable row level security;
+alter table student_profiles enable row level security;
 
 -- Teachers: anyone (anon + authenticated) may read active rows
 drop policy if exists "Public reads active teachers" on teachers;

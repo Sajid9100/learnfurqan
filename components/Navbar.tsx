@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
+import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Logo } from "./ui/Logo";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -61,14 +62,21 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Button variant="ghost" size="md">
-            Login
-          </Button>
-          <Link href="/teachers" className="contents">
-            <Button variant="primary" size="md">
-              Start Free Trial
-            </Button>
-          </Link>
+          <SignedOut>
+            <Link href="/sign-in" className="contents">
+              <Button variant="ghost" size="md">
+                Login
+              </Button>
+            </Link>
+            <Link href="/teachers" className="contents">
+              <Button variant="primary" size="md">
+                Start Free Trial
+              </Button>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <DesktopAuthedActions />
+          </SignedIn>
         </div>
 
         <button
@@ -102,24 +110,76 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <div className="mt-3 grid grid-cols-2 gap-2 px-1">
-                <Button variant="outline" size="md" className="w-full">
-                  Login
-                </Button>
-                <Link
-                  href="/teachers"
-                  onClick={() => setMobileOpen(false)}
-                  className="contents"
-                >
-                  <Button variant="primary" size="md" className="w-full">
-                    Free Trial
-                  </Button>
-                </Link>
-              </div>
+
+              <SignedOut>
+                <div className="mt-3 grid grid-cols-2 gap-2 px-1">
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setMobileOpen(false)}
+                    className="contents"
+                  >
+                    <Button variant="outline" size="md" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link
+                    href="/teachers"
+                    onClick={() => setMobileOpen(false)}
+                    className="contents"
+                  >
+                    <Button variant="primary" size="md" className="w-full">
+                      Free Trial
+                    </Button>
+                  </Link>
+                </div>
+              </SignedOut>
+
+              <SignedIn>
+                <MobileAuthedActions onNavigate={() => setMobileOpen(false)} />
+              </SignedIn>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </header>
+  );
+}
+
+function DesktopAuthedActions() {
+  const { user } = useUser();
+  const greeting = user?.firstName || user?.username || "Account";
+  return (
+    <>
+      <Link href="/dashboard" className="contents">
+        <Button variant="ghost" size="md">
+          <LayoutDashboard className="h-4 w-4" />
+          Dashboard
+        </Button>
+      </Link>
+      <span className="hidden text-sm font-medium text-muted-foreground xl:inline">
+        Hi, {greeting}
+      </span>
+      <UserButton afterSignOutUrl="/" />
+    </>
+  );
+}
+
+function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
+  const { user } = useUser();
+  const greeting = user?.firstName || user?.username || "your account";
+  return (
+    <div className="mt-3 flex flex-col gap-2 px-1">
+      <div className="px-1 text-sm text-muted-foreground">Hi, {greeting}</div>
+      <Link href="/dashboard" onClick={onNavigate} className="contents">
+        <Button variant="primary" size="md" className="w-full">
+          <LayoutDashboard className="h-4 w-4" />
+          Go to Dashboard
+        </Button>
+      </Link>
+      <div className="flex items-center justify-between rounded-xl border border-border bg-white px-3 py-2">
+        <span className="text-sm text-muted-foreground">Account</span>
+        <UserButton afterSignOutUrl="/" />
+      </div>
+    </div>
   );
 }
