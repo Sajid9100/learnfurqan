@@ -30,7 +30,7 @@ export function Logo({ className }: { className?: string }) {
     <div className={cn("flex items-center gap-2", className)}>
       <CrescentIcon className="h-8 w-8" />
       <span className="font-heading text-xl font-bold tracking-tight text-foreground">
-        Quran<span className="text-primary">Sphere</span>
+        Learn<span className="text-primary">Furqan</span>
       </span>
     </div>
   );
