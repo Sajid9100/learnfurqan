@@ -133,6 +133,41 @@ create index if not exists student_profiles_updated_at_idx
   on student_profiles (updated_at desc);
 
 -- ============================================================
+-- PARENT — CHILDREN (parents adding their kids to the platform)
+-- One parent (Clerk email) may register multiple children.
+-- linked_booking_email lets a parent attach existing bookings made
+-- under a different email (e.g. the child's email).
+-- ============================================================
+create table if not exists parent_children (
+  id                    uuid primary key default gen_random_uuid(),
+  parent_email          text not null,
+  child_name            text not null,
+  child_age             integer not null,
+  learning_goal         text not null,
+  current_level         text not null,
+  linked_booking_email  text default '',
+  created_at            timestamptz default now()
+);
+
+create index if not exists parent_children_parent_email_idx
+  on parent_children (parent_email);
+create index if not exists parent_children_linked_email_idx
+  on parent_children (linked_booking_email);
+
+-- ============================================================
+-- PARENT — NOTIFICATION PREFERENCES
+-- Keyed on parent's Clerk email.
+-- ============================================================
+create table if not exists parent_preferences (
+  email             text primary key,
+  notify_confirmed  boolean default true,
+  notify_zoom       boolean default true,
+  notify_reminder   boolean default true,
+  notify_notes      boolean default true,
+  updated_at        timestamptz default now()
+);
+
+-- ============================================================
 -- ROW LEVEL SECURITY
 -- Public site reads active teachers; everything else is locked
 -- behind the service role (used by server-side API routes).
@@ -142,6 +177,8 @@ alter table bookings enable row level security;
 alter table subscriptions enable row level security;
 alter table teacher_applications enable row level security;
 alter table student_profiles enable row level security;
+alter table parent_children enable row level security;
+alter table parent_preferences enable row level security;
 
 -- Teachers: anyone (anon + authenticated) may read active rows
 drop policy if exists "Public reads active teachers" on teachers;

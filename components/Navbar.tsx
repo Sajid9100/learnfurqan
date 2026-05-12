@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LayoutDashboard } from "lucide-react";
+import { Menu, X, LayoutDashboard, Users } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Logo } from "./ui/Logo";
 import { Button } from "./ui/button";
@@ -153,7 +153,13 @@ function DesktopAuthedActions() {
       <Link href="/dashboard" className="contents">
         <Button variant="ghost" size="md">
           <LayoutDashboard className="h-4 w-4" />
-          Dashboard
+          Student
+        </Button>
+      </Link>
+      <Link href="/parent" className="contents">
+        <Button variant="ghost" size="md">
+          <Users className="h-4 w-4" />
+          Parent
         </Button>
       </Link>
       <span className="hidden text-sm font-medium text-muted-foreground xl:inline">
@@ -173,7 +179,13 @@ function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
       <Link href="/dashboard" onClick={onNavigate} className="contents">
         <Button variant="primary" size="md" className="w-full">
           <LayoutDashboard className="h-4 w-4" />
-          Go to Dashboard
+          Student Dashboard
+        </Button>
+      </Link>
+      <Link href="/parent" onClick={onNavigate} className="contents">
+        <Button variant="outline" size="md" className="w-full">
+          <Users className="h-4 w-4" />
+          Parent Dashboard
         </Button>
       </Link>
       <div className="flex items-center justify-between rounded-xl border border-border bg-white px-3 py-2">

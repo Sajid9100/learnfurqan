@@ -25,19 +25,20 @@ export function TeacherCard({
       }}
       className="group relative flex h-full flex-col rounded-3xl border border-border bg-white p-6 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card"
     >
-      {teacher.is_featured && (
-        <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-accent-700">
-          <Sparkles className="h-3 w-3" />
-          Featured
-        </span>
-      )}
-
       <div className="flex items-start gap-4">
         <TeacherAvatar name={teacher.name} gender={teacher.gender} size="lg" />
-        <div className="min-w-0 flex-1 pr-16">
-          <h3 className="truncate font-heading text-lg font-semibold text-foreground">
-            {teacher.name}
-          </h3>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <h3 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold text-foreground">
+              {teacher.name}
+            </h3>
+            {teacher.is_featured && (
+              <span className="inline-flex flex-none items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent-700">
+                <Sparkles className="h-3 w-3" />
+                Featured
+              </span>
+            )}
+          </div>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="text-base leading-none">{teacher.country_flag}</span>
             {teacher.country}

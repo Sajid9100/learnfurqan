@@ -102,3 +102,48 @@ export type StudentProfile = {
   age_group: "" | AgeGroup;
   updated_at: string;
 };
+
+export type LearningGoal =
+  | "Quran Reading"
+  | "Tajweed"
+  | "Hifz"
+  | "Islamic Studies";
+
+export type ChildLevel = "Beginner" | "Can read Arabic" | "Intermediate";
+
+export type ParentChild = {
+  id: string;
+  parent_email: string;
+  child_name: string;
+  child_age: number;
+  learning_goal: LearningGoal;
+  current_level: ChildLevel;
+  linked_booking_email: string;
+  created_at: string;
+};
+
+export type ParentChildInsert = Omit<ParentChild, "id" | "created_at">;
+
+export type ParentPreferences = {
+  email: string;
+  notify_confirmed: boolean;
+  notify_zoom: boolean;
+  notify_reminder: boolean;
+  notify_notes: boolean;
+  updated_at: string;
+};
+
+export const LEARNING_GOALS: LearningGoal[] = [
+  "Quran Reading",
+  "Tajweed",
+  "Hifz",
+  "Islamic Studies",
+];
+
+export const CHILD_LEVELS: ChildLevel[] = [
+  "Beginner",
+  "Can read Arabic",
+  "Intermediate",
+];
+
+export const CLASSES_GOAL = 20;
