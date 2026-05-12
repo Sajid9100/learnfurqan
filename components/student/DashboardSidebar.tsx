@@ -53,7 +53,7 @@ export function DashboardSidebar() {
           href="/dashboard"
           className="font-heading text-lg font-bold text-primary"
         >
-          QuranSphere
+          LearnFurqan
         </Link>
         <div className="flex items-center gap-2">
           <UserButton afterSignOutUrl="/" />
@@ -80,7 +80,7 @@ export function DashboardSidebar() {
           >
             <div className="mb-6 flex items-center justify-between">
               <span className="font-heading text-lg font-bold text-primary">
-                QuranSphere
+                LearnFurqan
               </span>
               <button
                 type="button"
@@ -110,7 +110,7 @@ export function DashboardSidebar() {
           href="/dashboard"
           className="mb-6 font-heading text-xl font-bold text-primary"
         >
-          QuranSphere
+          LearnFurqan
         </Link>
         {links}
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-4">

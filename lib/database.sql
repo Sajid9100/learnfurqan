@@ -1,5 +1,5 @@
 -- ============================================================
--- QuranSphere — Supabase schema
+-- LearnFurqan — Supabase schema
 -- Run this in Supabase SQL Editor (Project ➜ SQL ➜ New query)
 -- ============================================================
 

@@ -75,7 +75,7 @@ export function PreferencesForm({ initial }: { initial: ParentPreferences }) {
         Email notifications
       </h2>
       <p className="mt-1 text-xs text-muted-foreground">
-        Choose when QuranSphere should email you about your children's classes.
+        Choose when LearnFurqan should email you about your children's classes.
       </p>
 
       <div className="mt-4 divide-y divide-border">

@@ -67,7 +67,7 @@ export function Sidebar() {
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-white px-4 py-3 lg:hidden">
         <Link href="/admin/dashboard" className="font-heading text-lg font-bold text-primary">
-          QuranSphere Admin
+          LearnFurqan Admin
         </Link>
         <button
           type="button"
@@ -91,7 +91,7 @@ export function Sidebar() {
           >
             <div className="mb-6 flex items-center justify-between">
               <span className="font-heading text-lg font-bold text-primary">
-                QuranSphere Admin
+                LearnFurqan Admin
               </span>
               <button
                 type="button"
@@ -122,7 +122,7 @@ export function Sidebar() {
           href="/admin/dashboard"
           className="mb-6 font-heading text-xl font-bold text-primary"
         >
-          QuranSphere Admin
+          LearnFurqan Admin
         </Link>
         {links}
         <button

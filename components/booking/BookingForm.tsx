@@ -354,10 +354,10 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
               <p>
                 Something went wrong. Please email us at{" "}
                 <a
-                  href="mailto:hello@quransphere.com"
+                  href="mailto:hello@learnfurqan.com"
                   className="font-semibold underline"
                 >
-                  hello@quransphere.com
+                  hello@learnfurqan.com
                 </a>
                 .
               </p>
@@ -504,7 +504,7 @@ function selectInputClasses(error: boolean) {
 
 function BookingSuccess({ email }: { email: string }) {
   const shareText = encodeURIComponent(
-    "I just booked a free Quran trial class on QuranSphere! Join me: https://quransphere.com"
+    "I just booked a free Quran trial class on LearnFurqan! Join me: https://learnfurqan.com"
   );
   return (
     <motion.div

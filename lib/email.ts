@@ -3,7 +3,7 @@ import type { Teacher } from "./types";
 
 const apiKey = process.env.RESEND_API_KEY;
 const fromAddress =
-  process.env.EMAIL_FROM || "QuranSphere <onboarding@resend.dev>";
+  process.env.EMAIL_FROM || "LearnFurqan <onboarding@resend.dev>";
 const adminAddress = process.env.ADMIN_EMAIL || "";
 
 const isPlaceholder = (v: string | undefined) =>
@@ -47,7 +47,7 @@ export async function sendBookingConfirmationEmails(
   const studentResult = await resend.emails.send({
     from: fromAddress,
     to: payload.studentEmail,
-    subject: "Your Free Trial Class is Confirmed — QuranSphere",
+    subject: "Your Free Trial Class is Confirmed — LearnFurqan",
     html: renderStudentEmail(payload),
     text: renderStudentEmailText(payload),
   });
@@ -78,7 +78,7 @@ function renderStudentEmail(p: BookingEmailPayload): string {
   <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
     <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
       <tr><td style="padding:32px 32px 0">
-        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">QuranSphere</h1>
+        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">LearnFurqan</h1>
       </td></tr>
       <tr><td style="padding:24px 32px">
         <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName)},</strong></p>
@@ -93,7 +93,7 @@ function renderStudentEmail(p: BookingEmailPayload): string {
         <p style="margin:0 0 8px;font-size:15px;line-height:1.6">We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.</p>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6">If you have any questions, reply to this email or WhatsApp us at: <strong>+1 (555) 000-0000</strong>.</p>
 
-        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The QuranSphere Team</strong></p>
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The LearnFurqan Team</strong></p>
       </td></tr>
     </table>
   </div>`;
@@ -114,7 +114,7 @@ function renderStudentEmailText(p: BookingEmailPayload): string {
     `If you have any questions, reply to this email or WhatsApp us at: +1 (555) 000-0000`,
     ``,
     `JazakAllah Khair,`,
-    `The QuranSphere Team`,
+    `The LearnFurqan Team`,
   ].join("\n");
 }
 
@@ -178,7 +178,7 @@ export async function sendZoomLinkEmail(payload: ZoomLinkEmailPayload) {
   const result = await resend.emails.send({
     from: fromAddress,
     to: payload.studentEmail,
-    subject: "Your QuranSphere Class is Confirmed — Zoom Link Inside",
+    subject: "Your LearnFurqan Class is Confirmed — Zoom Link Inside",
     html: renderZoomLinkEmail(payload),
     text: renderZoomLinkEmailText(payload),
   });
@@ -190,7 +190,7 @@ function renderZoomLinkEmail(p: ZoomLinkEmailPayload): string {
   <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
     <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
       <tr><td style="padding:32px 32px 0">
-        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">QuranSphere</h1>
+        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">LearnFurqan</h1>
       </td></tr>
       <tr><td style="padding:24px 32px">
         <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName)},</strong></p>
@@ -206,7 +206,7 @@ function renderZoomLinkEmail(p: ZoomLinkEmailPayload): string {
         </p>
         <p style="margin:0 0 16px;font-size:13px;color:#64748B;word-break:break-all">Or copy this link: ${escapeHtml(p.zoomLink)}</p>
 
-        <p style="margin:24px 0 0;font-size:15px">See you in class!<br/><strong>The QuranSphere Team</strong></p>
+        <p style="margin:24px 0 0;font-size:15px">See you in class!<br/><strong>The LearnFurqan Team</strong></p>
       </td></tr>
     </table>
   </div>`;
@@ -224,7 +224,7 @@ function renderZoomLinkEmailText(p: ZoomLinkEmailPayload): string {
     `Join Zoom: ${p.zoomLink}`,
     ``,
     `See you in class!`,
-    `The QuranSphere Team`,
+    `The LearnFurqan Team`,
   ].join("\n");
 }
 
@@ -248,7 +248,7 @@ export async function sendApplicationApprovedEmail(
   const result = await resend.emails.send({
     from: fromAddress,
     to: payload.email,
-    subject: "Welcome to QuranSphere — Your Application is Approved",
+    subject: "Welcome to LearnFurqan — Your Application is Approved",
     html: renderApprovalEmail(payload),
     text: renderApprovalEmailText(payload),
   });
@@ -266,7 +266,7 @@ export async function sendApplicationRejectedEmail(
   const result = await resend.emails.send({
     from: fromAddress,
     to: payload.email,
-    subject: "QuranSphere — Update on Your Teacher Application",
+    subject: "LearnFurqan — Update on Your Teacher Application",
     html: renderRejectionEmail(payload),
     text: renderRejectionEmailText(payload),
   });
@@ -278,11 +278,11 @@ function renderApprovalEmail(p: ApplicationEmailPayload): string {
   <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
     <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
       <tr><td style="padding:32px">
-        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">Welcome to QuranSphere</h1>
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">Welcome to LearnFurqan</h1>
         <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.name)},</strong></p>
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Alhamdulillah — your application to teach <strong>${escapeHtml(p.subject)}</strong> on QuranSphere has been <strong style="color:#0F766E">approved</strong>!</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Alhamdulillah — your application to teach <strong>${escapeHtml(p.subject)}</strong> on LearnFurqan has been <strong style="color:#0F766E">approved</strong>!</p>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Our onboarding team will reach out within 48 hours with next steps: profile setup, availability calendar, and your first student matches.</p>
-        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The QuranSphere Team</strong></p>
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The LearnFurqan Team</strong></p>
       </td></tr>
     </table>
   </div>`;
@@ -292,12 +292,12 @@ function renderApprovalEmailText(p: ApplicationEmailPayload): string {
   return [
     `Assalamu Alaikum ${p.name},`,
     ``,
-    `Your application to teach ${p.subject} on QuranSphere has been approved!`,
+    `Your application to teach ${p.subject} on LearnFurqan has been approved!`,
     ``,
     `Our onboarding team will reach out within 48 hours with next steps: profile setup, availability calendar, and your first student matches.`,
     ``,
     `JazakAllah Khair,`,
-    `The QuranSphere Team`,
+    `The LearnFurqan Team`,
   ].join("\n");
 }
 
@@ -306,11 +306,11 @@ function renderRejectionEmail(p: ApplicationEmailPayload): string {
   <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
     <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
       <tr><td style="padding:32px">
-        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:22px;font-weight:700">QuranSphere</h1>
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:22px;font-weight:700">LearnFurqan</h1>
         <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.name)},</strong></p>
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Thank you for applying to teach on QuranSphere. After careful review of your application, we are unable to move forward at this time.</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Thank you for applying to teach on LearnFurqan. After careful review of your application, we are unable to move forward at this time.</p>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6">We receive many qualified applications and this decision is not a reflection of your skills as a teacher. You are welcome to apply again in the future as our needs change.</p>
-        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair for your interest,<br/><strong>The QuranSphere Team</strong></p>
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair for your interest,<br/><strong>The LearnFurqan Team</strong></p>
       </td></tr>
     </table>
   </div>`;
@@ -320,12 +320,12 @@ function renderRejectionEmailText(p: ApplicationEmailPayload): string {
   return [
     `Assalamu Alaikum ${p.name},`,
     ``,
-    `Thank you for applying to teach on QuranSphere. After careful review of your application, we are unable to move forward at this time.`,
+    `Thank you for applying to teach on LearnFurqan. After careful review of your application, we are unable to move forward at this time.`,
     ``,
     `We receive many qualified applications and this decision is not a reflection of your skills as a teacher. You are welcome to apply again in the future as our needs change.`,
     ``,
     `JazakAllah Khair for your interest,`,
-    `The QuranSphere Team`,
+    `The LearnFurqan Team`,
   ].join("\n");
 }
 
@@ -343,7 +343,7 @@ export async function sendSubscriptionWelcomeEmail(
 ) {
   if (!isEmailConfigured) {
     console.warn("[email] RESEND_API_KEY not set — skipping welcome email.");
-    return { sent: false };
+    return { sent: false, reason: "no-api-key" };
   }
   const planLabel = payload.plan === "premium" ? "Premium" : "Basic";
   const resend = getResend();
@@ -354,7 +354,19 @@ export async function sendSubscriptionWelcomeEmail(
     html: renderSubscriptionWelcomeEmail(payload, planLabel),
     text: renderSubscriptionWelcomeEmailText(payload, planLabel),
   });
-  return { sent: !result.error };
+  if (result.error) {
+    console.error("[email] resend rejected welcome email", {
+      to: payload.studentEmail,
+      from: fromAddress,
+      error: result.error,
+    });
+    return { sent: false, error: result.error };
+  }
+  console.log("[email] welcome email sent", {
+    to: payload.studentEmail,
+    id: result.data?.id,
+  });
+  return { sent: true, id: result.data?.id };
 }
 
 export async function sendSubscriptionCancelledEmail(

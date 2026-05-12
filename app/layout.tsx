@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "QuranSphere — Learn Quran Online with Certified Teachers Worldwide",
+  title: "LearnFurqan — Learn Quran Online with Certified Teachers Worldwide",
   description:
     "Live one-on-one Quran classes for kids and adults. Flexible schedules, verified teachers, proven results. Start your free trial today.",
   keywords: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "Quran classes for kids",
   ],
   openGraph: {
-    title: "QuranSphere — Learn Quran Online",
+    title: "LearnFurqan — Learn Quran Online",
     description:
       "Live one-on-one Quran classes with certified teachers worldwide.",
     type: "website",

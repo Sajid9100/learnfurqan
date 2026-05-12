@@ -5,7 +5,7 @@ import { TeachersListing } from "@/components/teachers/TeachersListing";
 import { TEACHERS } from "@/lib/teachers-data";
 
 export const metadata: Metadata = {
-  title: "Find Your Perfect Quran Teacher | QuranSphere",
+  title: "Find Your Perfect Quran Teacher | LearnFurqan",
   description:
     "Browse verified Quran teachers from around the world. Filter by subject, gender, language, and price.",
 };

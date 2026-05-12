@@ -63,7 +63,7 @@ export default async function StudentDashboardPage() {
           Assalamu Alaikum, {student.firstName || student.fullName}!
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Here's your QuranSphere learning overview.
+          Here's your LearnFurqan learning overview.
         </p>
       </div>
 

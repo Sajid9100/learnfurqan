@@ -14,9 +14,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: Props): Metadata {
   const teacher = getSeedTeacherBySlug(params.slug);
-  if (!teacher) return { title: "Book a trial | QuranSphere" };
+  if (!teacher) return { title: "Book a trial | LearnFurqan" };
   return {
-    title: `Book a free trial with ${teacher.name} | QuranSphere`,
+    title: `Book a free trial with ${teacher.name} | LearnFurqan`,
     description: `Reserve your free trial class with ${teacher.name} — ${teacher.subject}.`,
   };
 }

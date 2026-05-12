@@ -56,6 +56,8 @@ export async function POST(req: Request) {
     );
   }
 
+  console.log(`[stripe webhook] received event=${event.type} id=${event.id}`);
+
   try {
     switch (event.type) {
       case "checkout.session.completed":
@@ -128,16 +130,27 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     plan,
   });
 
+  console.log("[stripe webhook] checkout completed", {
+    studentEmail,
+    studentName,
+    plan,
+  });
+
   if (studentEmail) {
     try {
-      await sendSubscriptionWelcomeEmail({
+      const result = await sendSubscriptionWelcomeEmail({
         studentEmail,
         studentName,
         plan,
       });
+      console.log("[stripe webhook] welcome email result", result);
     } catch (err) {
       console.error("[stripe webhook] welcome email failed", err);
     }
+  } else {
+    console.warn(
+      "[stripe webhook] skipped welcome email — no studentEmail on session"
+    );
   }
 }
 

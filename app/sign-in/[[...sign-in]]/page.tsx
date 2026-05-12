@@ -10,7 +10,7 @@ export default function SignInPage() {
         href="/"
         className="mb-6 font-heading text-2xl font-bold text-primary"
       >
-        QuranSphere
+        LearnFurqan
       </Link>
       <SignIn
         appearance={{

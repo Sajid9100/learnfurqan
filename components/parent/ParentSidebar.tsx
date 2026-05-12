@@ -66,7 +66,7 @@ export function ParentSidebar() {
           href="/parent"
           className="font-heading text-lg font-bold text-primary"
         >
-          QuranSphere · Parent
+          LearnFurqan · Parent
         </Link>
         <div className="flex items-center gap-2">
           <UserButton afterSignOutUrl="/" />
@@ -92,7 +92,7 @@ export function ParentSidebar() {
           >
             <div className="mb-6 flex items-center justify-between">
               <span className="font-heading text-lg font-bold text-primary">
-                QuranSphere
+                LearnFurqan
               </span>
               <button
                 type="button"
@@ -121,7 +121,7 @@ export function ParentSidebar() {
           href="/parent"
           className="mb-1 font-heading text-xl font-bold text-primary"
         >
-          QuranSphere
+          LearnFurqan
         </Link>
         <span className="mb-6 text-xs uppercase tracking-wider text-muted-foreground">
           Parent Dashboard

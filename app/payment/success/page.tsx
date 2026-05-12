@@ -6,8 +6,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Subscription confirmed | QuranSphere",
-  description: "Your QuranSphere subscription is active.",
+  title: "Subscription confirmed | LearnFurqan",
+  description: "Your LearnFurqan subscription is active.",
 };
 
 export default function PaymentSuccessPage({

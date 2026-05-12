@@ -14,10 +14,10 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: Props): Metadata {
   const teacher = getSeedTeacherBySlug(params.slug);
   if (!teacher) {
-    return { title: "Teacher not found | QuranSphere" };
+    return { title: "Teacher not found | LearnFurqan" };
   }
   return {
-    title: `${teacher.name} — ${teacher.subject} | QuranSphere`,
+    title: `${teacher.name} — ${teacher.subject} | LearnFurqan`,
     description: teacher.bio,
   };
 }

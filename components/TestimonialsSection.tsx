@@ -55,7 +55,7 @@ export function TestimonialsSection() {
               What parents are saying
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Real stories from families learning with QuranSphere.
+              Real stories from families learning with LearnFurqan.
             </p>
           </div>
         </Reveal>

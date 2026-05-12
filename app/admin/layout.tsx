@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ToastProvider } from "@/components/admin/Toast";
 
 export const metadata: Metadata = {
-  title: "QuranSphere Admin",
+  title: "LearnFurqan Admin",
   robots: { index: false, follow: false },
 };
 

@@ -5,9 +5,9 @@ import { PricingSection } from "@/components/PricingSection";
 import { CTASection } from "@/components/CTASection";
 
 export const metadata: Metadata = {
-  title: "Pricing | QuranSphere",
+  title: "Pricing | LearnFurqan",
   description:
-    "Simple, transparent pricing for QuranSphere — free trial on every plan, cancel anytime.",
+    "Simple, transparent pricing for LearnFurqan — free trial on every plan, cancel anytime.",
 };
 
 export default function PricingPage() {

@@ -45,7 +45,7 @@ export function Navbar() {
       )}
     >
       <div className="container flex h-16 items-center justify-between md:h-20">
-        <Link href="/" className="flex items-center" aria-label="QuranSphere home">
+        <Link href="/" className="flex items-center" aria-label="LearnFurqan home">
           <Logo />
         </Link>
 
