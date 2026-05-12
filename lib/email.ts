@@ -329,6 +329,186 @@ function renderRejectionEmailText(p: ApplicationEmailPayload): string {
   ].join("\n");
 }
 
+// ---------------------------------------------------------------------------
+// Subscription emails — welcome / cancelled / payment failed
+// ---------------------------------------------------------------------------
+export type SubscriptionEmailPayload = {
+  studentName: string;
+  studentEmail: string;
+  plan: "basic" | "premium";
+};
+
+export async function sendSubscriptionWelcomeEmail(
+  payload: SubscriptionEmailPayload
+) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping welcome email.");
+    return { sent: false };
+  }
+  const planLabel = payload.plan === "premium" ? "Premium" : "Basic";
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: `Welcome to LearnFurqan — Your ${planLabel} is Active!`,
+    html: renderSubscriptionWelcomeEmail(payload, planLabel),
+    text: renderSubscriptionWelcomeEmailText(payload, planLabel),
+  });
+  return { sent: !result.error };
+}
+
+export async function sendSubscriptionCancelledEmail(
+  payload: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+) {
+  if (!isEmailConfigured) {
+    console.warn(
+      "[email] RESEND_API_KEY not set — skipping cancellation email."
+    );
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: "Your LearnFurqan Subscription has been Cancelled",
+    html: renderSubscriptionCancelledEmail(payload),
+    text: renderSubscriptionCancelledEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+export async function sendSubscriptionPaymentFailedEmail(
+  payload: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+) {
+  if (!isEmailConfigured) {
+    console.warn(
+      "[email] RESEND_API_KEY not set — skipping payment-failed email."
+    );
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: "Action Required — Payment Failed for LearnFurqan",
+    html: renderSubscriptionPaymentFailedEmail(payload),
+    text: renderSubscriptionPaymentFailedEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderSubscriptionWelcomeEmail(
+  p: SubscriptionEmailPayload,
+  planLabel: string
+): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px">
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">Welcome to LearnFurqan</h1>
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName || "")},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">JazakAllah Khair for subscribing to LearnFurqan!</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Your <strong>${escapeHtml(planLabel)} plan</strong> is now active.</p>
+        <p style="margin:16px 0 8px;font-size:15px;font-weight:600">What's next:</p>
+        <ul style="margin:0 0 16px;padding-left:20px;font-size:15px;line-height:1.7">
+          <li>Browse our verified teachers</li>
+          <li>Book your first class</li>
+          <li>Start your Quran journey</li>
+        </ul>
+        <p style="margin:24px 0;text-align:center">
+          <a href="https://learnfurqan.com/dashboard" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Go to your dashboard</a>
+        </p>
+        <p style="margin:24px 0 0;font-size:15px">The LearnFurqan Team</p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderSubscriptionWelcomeEmailText(
+  p: SubscriptionEmailPayload,
+  planLabel: string
+): string {
+  return [
+    `Assalamu Alaikum ${p.studentName || ""},`,
+    ``,
+    `JazakAllah Khair for subscribing to LearnFurqan!`,
+    ``,
+    `Your ${planLabel} plan is now active.`,
+    ``,
+    `What's next:`,
+    `- Browse our verified teachers`,
+    `- Book your first class`,
+    `- Start your Quran journey`,
+    ``,
+    `Go to your dashboard: https://learnfurqan.com/dashboard`,
+    ``,
+    `The LearnFurqan Team`,
+  ].join("\n");
+}
+
+function renderSubscriptionCancelledEmail(
+  p: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px">
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:22px;font-weight:700">LearnFurqan</h1>
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName || "")},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Your subscription has been cancelled.</p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">You can resubscribe anytime at <a href="https://learnfurqan.com/pricing" style="color:#0F766E">learnfurqan.com/pricing</a>.</p>
+        <p style="margin:24px 0 0;font-size:15px">We hope to see you back soon!<br/>The LearnFurqan Team</p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderSubscriptionCancelledEmailText(
+  p: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+): string {
+  return [
+    `Assalamu Alaikum ${p.studentName || ""},`,
+    ``,
+    `Your subscription has been cancelled.`,
+    `You can resubscribe anytime at learnfurqan.com/pricing`,
+    ``,
+    `We hope to see you back soon!`,
+    `The LearnFurqan Team`,
+  ].join("\n");
+}
+
+function renderSubscriptionPaymentFailedEmail(
+  p: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px">
+        <h1 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#B45309;font-size:22px;font-weight:700">Action Required</h1>
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName || "")},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Your payment failed. Please update your payment method to keep your LearnFurqan subscription active.</p>
+        <p style="margin:24px 0;text-align:center">
+          <a href="https://learnfurqan.com/pricing" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Update payment method</a>
+        </p>
+        <p style="margin:24px 0 0;font-size:15px">The LearnFurqan Team</p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderSubscriptionPaymentFailedEmailText(
+  p: Pick<SubscriptionEmailPayload, "studentName" | "studentEmail">
+): string {
+  return [
+    `Assalamu Alaikum ${p.studentName || ""},`,
+    ``,
+    `Your payment failed. Please update your payment method:`,
+    `https://learnfurqan.com/pricing`,
+    ``,
+    `The LearnFurqan Team`,
+  ].join("\n");
+}
+
 function row(label: string, value: string) {
   return `<tr>
     <td style="padding:10px 14px;font-size:13px;color:#64748B;border-bottom:1px solid #E2E8E5;width:40%">${label}</td>
