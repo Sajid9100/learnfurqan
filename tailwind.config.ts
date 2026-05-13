@@ -19,6 +19,8 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // Single primary color: a clean, modern green. 60-30-10 means
+        // primary appears in ~10% of the UI as the CTA / highlight.
         primary: {
           DEFAULT: "#0F766E",
           50: "#ECFDF5",
@@ -32,22 +34,28 @@ const config: Config = {
           800: "#0B524E",
           900: "#083E3B",
         },
+        // Accent is intentionally another shade of the same green family — no
+        // second hue. Existing components reference `accent` for badges,
+        // ratings, and pending states; remapping (rather than deleting) keeps
+        // them rendering in-palette.
         accent: {
-          DEFAULT: "#D4A017",
-          50: "#FEF8E7",
-          100: "#FCEFC4",
-          200: "#F9DF89",
-          300: "#F0CB47",
-          400: "#E2B428",
-          500: "#D4A017",
-          600: "#A67C12",
-          700: "#7A5A0D",
+          DEFAULT: "#0D6661",
+          50: "#ECFDF5",
+          100: "#D1FAE5",
+          200: "#A7F3D0",
+          300: "#6EE7B7",
+          400: "#34D399",
+          500: "#10B981",
+          600: "#0D6661",
+          700: "#0B524E",
         },
-        background: "#F8FAF9",
-        foreground: "#0F172A",
+        // 60% — page background
+        background: "#FFFFFF",
+        // 30% — text + dark UI; near-black for high contrast
+        foreground: "#0A0F1A",
         muted: {
-          DEFAULT: "#F1F5F4",
-          foreground: "#64748B",
+          DEFAULT: "#F4F6F5",
+          foreground: "#475569",
         },
         border: "#E2E8E5",
       },
