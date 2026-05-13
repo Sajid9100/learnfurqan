@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { TeacherAvatar } from "./TeacherAvatar";
 import { Button } from "@/components/ui/button";
+import { Flag } from "@/components/ui/Flag";
 import type { Teacher } from "@/lib/types";
 
 const REVIEWS = [
@@ -65,9 +66,13 @@ export function TeacherProfile({ teacher }: { teacher: Teacher }) {
                   gender={teacher.gender}
                   size="xl"
                 />
-                <h1 className="mt-5 font-heading text-2xl font-bold tracking-tight text-foreground">
-                  {teacher.name}{" "}
-                  <span className="ml-1">{teacher.country_flag}</span>
+                <h1 className="mt-5 inline-flex items-center gap-2 font-heading text-2xl font-bold tracking-tight text-foreground">
+                  {teacher.name}
+                  <Flag
+                    code={teacher.country_flag}
+                    size="md"
+                    label={teacher.country}
+                  />
                 </h1>
                 <span className="mt-3 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                   {teacher.subject}

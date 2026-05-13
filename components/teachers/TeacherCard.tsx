@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Star, Languages, Clock, Sparkles } from "lucide-react";
 import { TeacherAvatar } from "./TeacherAvatar";
 import { Button } from "@/components/ui/button";
+import { Flag } from "@/components/ui/Flag";
 import type { Teacher } from "@/lib/types";
 
 export function TeacherCard({
@@ -40,7 +41,7 @@ export function TeacherCard({
             )}
           </div>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="text-base leading-none">{teacher.country_flag}</span>
+            <Flag code={teacher.country_flag} size="sm" label={teacher.country} />
             {teacher.country}
           </p>
         </div>

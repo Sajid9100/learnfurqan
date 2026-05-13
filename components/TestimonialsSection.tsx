@@ -2,6 +2,7 @@
 
 import { Star, Quote } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
+import { Flag } from "./ui/Flag";
 
 type Testimonial = {
   initials: string;
@@ -17,7 +18,7 @@ const TESTIMONIALS: Testimonial[] = [
     initials: "SM",
     name: "Sarah M.",
     location: "USA",
-    flag: "🇺🇸",
+    flag: "us",
     quote:
       "My daughter has memorized 3 surahs in just 2 months. The teacher is amazing and so patient with kids.",
     bg: "from-primary to-primary-700",
@@ -26,7 +27,7 @@ const TESTIMONIALS: Testimonial[] = [
     initials: "AK",
     name: "Abdullah K.",
     location: "UK",
-    flag: "🇬🇧",
+    flag: "gb",
     quote:
       "Finally a platform that feels modern and professional. Booking is easy and teachers are top quality.",
     bg: "from-accent to-accent-600",
@@ -35,7 +36,7 @@ const TESTIMONIALS: Testimonial[] = [
     initials: "FR",
     name: "Fatima R.",
     location: "Canada",
-    flag: "🇨🇦",
+    flag: "ca",
     quote:
       "As a revert Muslim, I was nervous to start. My teacher made me feel so comfortable. Highly recommend.",
     bg: "from-primary-700 to-primary-900",
@@ -95,8 +96,8 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         </div>
         <div>
           <p className="text-sm font-semibold text-foreground">{t.name}</p>
-          <p className="text-xs text-muted-foreground">
-            <span className="mr-1">{t.flag}</span>
+          <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Flag code={t.flag} size="sm" label={t.location} />
             {t.location}
           </p>
         </div>

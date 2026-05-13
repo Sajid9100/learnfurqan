@@ -200,7 +200,7 @@ insert into teachers
    intro_video_url, available_slots, is_featured, slug)
 values
   ('Ustadh Ahmad Ali', 'male', 'Tajweed & Hifz', 'English, Arabic',
-   'Egypt', '🇪🇬', 10, 15.00, 4.9, 134,
+   'Egypt', 'eg', 10, 15.00, 4.9, 134,
    'I have been teaching Quran for over 10 years with a focus on Tajweed and Hifz programs. I hold an Ijazah in Quran recitation and have helped over 200 students worldwide complete their memorization goals.',
    'Patient, structured, and encouraging. I create a personalized plan for each student.',
    'Ijazah in Tajweed, Al-Azhar University Certified',
@@ -209,7 +209,7 @@ values
    true, 'ustadh-ahmad-ali'),
 
   ('Sister Fatima Malik', 'female', 'Quran for Kids & Noorani Qaida', 'English, Urdu',
-   'Pakistan', '🇵🇰', 6, 12.00, 4.8, 98,
+   'Pakistan', 'pk', 6, 12.00, 4.8, 98,
    'Specializing in teaching young children, I make Quran learning fun and engaging. My students love the interactive storytelling approach I use to teach Islamic values alongside recitation.',
    'Fun, engaging, and child-friendly. I use games and rewards to keep kids motivated.',
    'Diploma in Islamic Education, Certified Kids Quran Teacher',
@@ -218,7 +218,7 @@ values
    true, 'sister-fatima-malik'),
 
   ('Sheikh Omar Hassan', 'male', 'Arabic Language & Tafseer', 'English, Arabic, French',
-   'Jordan', '🇯🇴', 14, 20.00, 5.0, 201,
+   'Jordan', 'jo', 14, 20.00, 5.0, 201,
    'With 14 years of experience teaching classical Arabic and Tafseer, I help students go beyond recitation to truly understand the meaning of the Quran. I have students from over 15 countries.',
    'Academic yet accessible. I connect Quranic meanings to real life situations.',
    'Masters in Islamic Studies, Jordan University. Ijazah in Tafseer.',
@@ -227,7 +227,7 @@ values
    true, 'sheikh-omar-hassan'),
 
   ('Ustadha Maryam Yusuf', 'female', 'Female Students Only — Quran & Tajweed', 'English, Malay',
-   'Malaysia', '🇲🇾', 7, 14.00, 4.9, 87,
+   'Malaysia', 'my', 7, 14.00, 4.9, 87,
    'I provide a safe and comfortable learning environment exclusively for female students and young girls. My approach is gentle, supportive, and rooted in traditional Islamic values.',
    'Warm, supportive, and confidence-building. Perfect for sisters new to Quran learning.',
    'Diploma in Quran Recitation, International Islamic University Malaysia',
@@ -236,7 +236,7 @@ values
    false, 'ustadha-maryam-yusuf'),
 
   ('Ustadh Bilal Qureshi', 'male', 'Hifz Program (Full Memorization)', 'English, Urdu',
-   'United Kingdom', '🇬🇧', 9, 18.00, 4.8, 112,
+   'United Kingdom', 'gb', 9, 18.00, 4.8, 112,
    'I run a structured 3-year Hifz program online. My students follow a proven daily revision system that ensures long-term retention. I have helped 40+ students complete their Hifz online.',
    'Disciplined and systematic. I track every student''s daily progress closely.',
    'Hafiz ul Quran, Deobandi Ijazah',
@@ -245,7 +245,7 @@ values
    false, 'ustadh-bilal-qureshi'),
 
   ('Sister Aisha Rahman', 'female', 'Islamic Studies & Duas for Kids', 'English',
-   'United States', '🇺🇸', 5, 13.00, 4.7, 63,
+   'United States', 'us', 5, 13.00, 4.7, 63,
    'Born and raised in the US, I understand the challenges of raising Muslim kids in the West. My classes combine Quran recitation, daily duas, and fun Islamic stories tailored for children aged 4 to 12.',
    'Creative, storytelling-based, and highly interactive. Parents love seeing their kids excited about Islam.',
    'Bachelor of Islamic Studies, Islamic Online University',
@@ -254,7 +254,7 @@ values
    false, 'sister-aisha-rahman'),
 
   ('Ustadh Yusuf Al-Turki', 'male', 'Tajweed Mastery — Advanced Level', 'English, Arabic, Turkish',
-   'Turkey', '🇹🇷', 12, 22.00, 4.9, 155,
+   'Turkey', 'tr', 12, 22.00, 4.9, 155,
    'I specialize in advanced Tajweed for students who already read Quran and want to perfect their recitation. My students have gone on to lead prayers at their local mosques worldwide.',
    'Precise, detail-oriented, and highly motivating. I push students to excellence.',
    'Ijazah with Sanad, Diyanet Certified Turkey',
@@ -263,7 +263,7 @@ values
    true, 'ustadh-yusuf-al-turki'),
 
   ('Ustadha Khadijah Osei', 'female', 'Quran for Reverts & Beginners', 'English',
-   'Ghana', '🇬🇭', 4, 10.00, 4.8, 44,
+   'Ghana', 'gh', 4, 10.00, 4.8, 44,
    'Being a revert myself, I have a deep understanding of where new Muslims start from. I teach absolute beginners with zero prior knowledge — starting from Arabic letters all the way to fluent Quran recitation.',
    'Compassionate, zero-judgment, and beginner-friendly. Perfect for reverts and adult beginners.',
    'Certified Quran Teacher, Al-Maghrib Institute',

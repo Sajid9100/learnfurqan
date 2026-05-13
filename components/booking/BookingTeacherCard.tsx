@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Star, ShieldCheck } from "lucide-react";
 import { TeacherAvatar } from "@/components/teachers/TeacherAvatar";
+import { Flag } from "@/components/ui/Flag";
 import type { Teacher } from "@/lib/types";
 
 export function BookingTeacherCard({ teacher }: { teacher: Teacher }) {
@@ -28,9 +29,9 @@ export function BookingTeacherCard({ teacher }: { teacher: Teacher }) {
             size="lg"
           />
           <div className="min-w-0">
-            <p className="truncate font-semibold text-foreground">
-              {teacher.name}{" "}
-              <span className="ml-1">{teacher.country_flag}</span>
+            <p className="flex items-center gap-1.5 truncate font-semibold text-foreground">
+              <span className="truncate">{teacher.name}</span>
+              <Flag code={teacher.country_flag} size="sm" label={teacher.country} />
             </p>
             <p className="truncate text-sm text-primary">{teacher.subject}</p>
             <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">

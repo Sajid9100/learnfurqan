@@ -5,6 +5,7 @@ import { Plus, Pencil } from "lucide-react";
 import type { Teacher } from "@/lib/types";
 import { Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
+import { Flag } from "@/components/ui/Flag";
 
 type TeacherRow = Teacher & { is_active?: boolean };
 
@@ -170,7 +171,10 @@ export function TeachersClient() {
                     </td>
                     <td className="px-4 py-3 text-foreground">{t.subject}</td>
                     <td className="px-4 py-3 text-foreground">
-                      {t.country_flag} {t.country}
+                      <span className="inline-flex items-center gap-2">
+                        <Flag code={t.country_flag} size="sm" label={t.country} />
+                        {t.country}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-foreground">
                       ${Number(t.price_per_class).toFixed(2)}
@@ -409,13 +413,19 @@ function TeacherFormModal({
               required
             />
           </Field>
-          <Field label="Country flag emoji" required>
+          <Field
+            label="Country code (ISO 3166-1 alpha-2)"
+            required
+          >
             <input
               className={inputCls}
               value={form.country_flag}
-              onChange={(e) => set("country_flag", e.target.value)}
+              onChange={(e) =>
+                set("country_flag", e.target.value.toLowerCase())
+              }
               required
-              placeholder="🇪🇬"
+              maxLength={2}
+              placeholder="eg"
             />
           </Field>
           <Field label="Experience (years)">

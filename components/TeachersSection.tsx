@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Star, Clock } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { Button } from "./ui/button";
+import { Flag } from "./ui/Flag";
 
 type Teacher = {
   initials: string;
@@ -24,7 +25,7 @@ const TEACHERS: Teacher[] = [
     name: "Ustadh Ahmad",
     specialization: "Tajweed & Hifz",
     country: "Egypt",
-    flag: "🇪🇬",
+    flag: "eg",
     experience: "8 years",
     price: "$15/hr",
     rating: 4.9,
@@ -36,7 +37,7 @@ const TEACHERS: Teacher[] = [
     name: "Sister Fatima",
     specialization: "Quran for Kids",
     country: "Pakistan",
-    flag: "🇵🇰",
+    flag: "pk",
     experience: "5 years",
     price: "$12/hr",
     rating: 4.8,
@@ -48,7 +49,7 @@ const TEACHERS: Teacher[] = [
     name: "Sheikh Omar",
     specialization: "Arabic & Tafseer",
     country: "Jordan",
-    flag: "🇯🇴",
+    flag: "jo",
     experience: "12 years",
     price: "$20/hr",
     rating: 5.0,
@@ -60,7 +61,7 @@ const TEACHERS: Teacher[] = [
     name: "Ustadha Maryam",
     specialization: "Female Students Only",
     country: "Malaysia",
-    flag: "🇲🇾",
+    flag: "my",
     experience: "6 years",
     price: "$14/hr",
     rating: 4.9,
@@ -140,8 +141,8 @@ function TeacherCard({ teacher }: { teacher: Teacher }) {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <span className="text-base leading-none">{teacher.flag}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Flag code={teacher.flag} size="sm" label={teacher.country} />
             {teacher.country}
           </span>
           <span className="text-border">•</span>
