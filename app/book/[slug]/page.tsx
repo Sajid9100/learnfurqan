@@ -33,14 +33,14 @@ export default function BookingPage({ params }: Props) {
         <div className="container py-12 md:py-16">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-              Free Trial
+              Book a class
             </span>
             <h1 className="mt-4 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-              Book your{" "}
-              <span className="text-gradient-primary">free trial class</span>
+              Book with{" "}
+              <span className="text-gradient-primary">{teacher.name}</span>
             </h1>
             <p className="mt-3 text-base text-muted-foreground">
-              Meet your teacher live — no commitment, no payment.
+              First class is free — meet your teacher live with no commitment.
             </p>
           </div>
         </div>

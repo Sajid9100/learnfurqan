@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Play, Star, Video, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
@@ -43,9 +44,11 @@ export function HeroSection() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button variant="primary" size="xl" className="shadow-glow">
-              Start Free Trial
-            </Button>
+            <Link href="/teachers" className="contents">
+              <Button variant="primary" size="xl" className="shadow-glow">
+                Browse Teachers
+              </Button>
+            </Link>
             <Button variant="outline" size="xl">
               <Play className="h-4 w-4 fill-primary" />
               Watch How It Works

@@ -99,6 +99,29 @@ export async function createBooking(
   return { id: row.id as string };
 }
 
+// Returns true if the student already has a non-cancelled booking with this
+// teacher — i.e. their free first class has been used and the next one needs
+// to be paid for.
+export async function hasPriorBookingWithTeacher(
+  studentEmail: string,
+  teacherId: string
+): Promise<boolean> {
+  if (!isSupabaseAdminConfigured) return false;
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("bookings")
+    .select("id")
+    .eq("student_email", studentEmail.toLowerCase())
+    .eq("teacher_id", teacherId)
+    .neq("status", "cancelled")
+    .limit(1);
+  if (error) {
+    console.warn("[supabase] hasPriorBookingWithTeacher failed:", error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
+}
+
 export async function createTeacherApplication(
   data: TeacherApplicationInsert
 ): Promise<{ id: string }> {

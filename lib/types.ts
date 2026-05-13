@@ -37,7 +37,7 @@ export type Booking = {
   message: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   stripe_session_id: string;
-  payment_status: "free_trial" | "paid" | "refunded";
+  payment_status: "free_trial" | "pending" | "paid" | "refunded";
   zoom_link: string;
   created_at: string;
 };

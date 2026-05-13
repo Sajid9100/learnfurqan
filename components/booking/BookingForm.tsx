@@ -82,7 +82,7 @@ const initialState: FormState = {
   message: "",
 };
 
-type Status = "idle" | "submitting" | "success" | "error";
+type Status = "idle" | "submitting" | "success" | "redirecting" | "error";
 
 export function BookingForm({ teacher }: { teacher: Teacher }) {
   const [form, setForm] = useState<FormState>(initialState);
@@ -136,9 +136,19 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}) as { error?: string });
+      const data: {
+        ok?: boolean;
+        error?: string;
+        requires_payment?: boolean;
+        checkout_url?: string;
+      } = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
         throw new Error(data.error || `Request failed (${res.status})`);
+      }
+      if (data.requires_payment && data.checkout_url) {
+        setStatus("redirecting");
+        window.location.href = data.checkout_url;
+        return;
       }
       setStatus("success");
     } catch (err) {
@@ -159,10 +169,11 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
       noValidate
     >
       <h2 className="font-heading text-2xl font-semibold text-foreground">
-        Book your free trial
+        Book your class
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Fill in your details — we’ll confirm by email within 2 hours.
+        Your first class with {teacher.name.split(" ")[0]} is free. Fill in
+        your details — we’ll confirm by email within 2 hours.
       </p>
 
       <div className="mt-6 grid gap-5">
@@ -373,7 +384,7 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
         type="submit"
         variant="primary"
         size="xl"
-        disabled={status === "submitting"}
+        disabled={status === "submitting" || status === "redirecting"}
         className="mt-7 w-full"
       >
         {status === "submitting" ? (
@@ -381,17 +392,22 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
             <Loader2 className="h-4 w-4 animate-spin" />
             Confirming…
           </>
+        ) : status === "redirecting" ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Redirecting to checkout…
+          </>
         ) : (
           <>
             <Send className="h-4 w-4" />
-            Confirm Free Trial Booking
+            Confirm Booking
           </>
         )}
       </Button>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        By continuing you agree to our terms. No credit card required for
-        trial.
+        First class with each teacher is free. Subsequent classes are charged
+        at the teacher’s rate.
       </p>
     </form>
   );

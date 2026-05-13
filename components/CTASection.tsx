@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 import { Button } from "./ui/button";
@@ -25,12 +26,14 @@ export function CTASection() {
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-3">
-              <Button variant="primary" size="xl" className="shadow-glow">
-                Book Your Free Trial Class
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <Link href="/teachers" className="contents">
+                <Button variant="primary" size="xl" className="shadow-glow">
+                  Browse Teachers
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
               <p className="text-xs font-medium text-muted-foreground">
-                No credit card required for trial
+                No credit card required for your first class
               </p>
             </div>
           </div>

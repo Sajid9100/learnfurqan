@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
-import { createBooking, getTeacherBySlug } from "@/lib/supabase";
+import Stripe from "stripe";
+import {
+  createBooking,
+  getTeacherBySlug,
+  hasPriorBookingWithTeacher,
+  isSupabaseAdminConfigured,
+} from "@/lib/supabase";
 import { sendBookingConfirmationEmails } from "@/lib/email";
-import type { AgeGroup, StudentLevel } from "@/lib/types";
+import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import type { AgeGroup, StudentLevel, Teacher } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -52,26 +59,54 @@ export async function POST(req: Request) {
     );
   }
 
+  const studentEmail = body.student_email!.trim().toLowerCase();
+  const studentName = body.student_name!.trim();
+
+  // First booking with a given teacher is always free. Subsequent bookings
+  // with the same teacher get routed through Stripe Checkout.
+  const requiresPayment =
+    isSupabaseAdminConfigured &&
+    (await hasPriorBookingWithTeacher(studentEmail, teacher.id));
+
   try {
     const { id } = await createBooking({
       teacher_id: teacher.id,
       teacher_name: teacher.name,
       teacher_slug: teacher.slug,
-      student_name: body.student_name!.trim(),
-      student_email: body.student_email!.trim().toLowerCase(),
+      student_name: studentName,
+      student_email: studentEmail,
       student_phone: body.student_phone!.trim(),
       student_country: body.student_country!.trim(),
       age_group: body.age_group!,
       current_level: body.current_level!,
       selected_slot: body.selected_slot!,
       message: (body.message ?? "").trim(),
+      payment_status: requiresPayment ? "pending" : "free_trial",
     });
 
-    // Fire-and-forget email send so a transient Resend failure doesn't fail
-    // the whole request — the booking is already saved.
+    if (requiresPayment) {
+      const checkout = await createBookingCheckoutSession({
+        bookingId: id,
+        teacher,
+        studentEmail,
+        studentName,
+      });
+      return NextResponse.json(
+        {
+          ok: true,
+          id,
+          requires_payment: true,
+          checkout_url: checkout.url,
+        },
+        { status: 201 }
+      );
+    }
+
+    // Free trial — send confirmation emails now. Paid bookings only get
+    // emails after the Stripe webhook flips the row to "paid".
     sendBookingConfirmationEmails({
-      studentName: body.student_name!.trim(),
-      studentEmail: body.student_email!.trim(),
+      studentName,
+      studentEmail,
       studentPhone: body.student_phone!.trim(),
       studentCountry: body.student_country!.trim(),
       ageGroup: body.age_group!,
@@ -83,7 +118,10 @@ export async function POST(req: Request) {
       console.error("[bookings] email send failed", err);
     });
 
-    return NextResponse.json({ ok: true, id }, { status: 201 });
+    return NextResponse.json(
+      { ok: true, id, requires_payment: false },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("[bookings] insert failed", err);
     return NextResponse.json(
@@ -91,6 +129,66 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+async function createBookingCheckoutSession(args: {
+  bookingId: string;
+  teacher: Teacher;
+  studentEmail: string;
+  studentName: string;
+}): Promise<{ url: string }> {
+  if (!isStripeConfigured) {
+    throw new Error("Stripe is not configured on the server.");
+  }
+
+  const unitAmount = Math.round(args.teacher.price_per_class * 100);
+  if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
+    throw new Error("Teacher price is not configured");
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const stripe = getStripe();
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          unit_amount: unitAmount,
+          product_data: {
+            name: `${args.teacher.name} — class`,
+            description: args.teacher.subject,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    customer_email: args.studentEmail,
+    success_url: `${siteUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl}/book/${args.teacher.slug}`,
+    metadata: {
+      booking_id: args.bookingId,
+      teacher_slug: args.teacher.slug,
+      student_email: args.studentEmail,
+      student_name: args.studentName,
+    },
+    payment_intent_data: {
+      metadata: {
+        booking_id: args.bookingId,
+        teacher_slug: args.teacher.slug,
+      },
+    },
+  });
+
+  if (!session.url) {
+    throw new Stripe.errors.StripeError({
+      type: "api_error",
+      message: "Stripe did not return a checkout URL",
+    } as Stripe.StripeRawError);
+  }
+
+  return { url: session.url };
 }
 
 function validate(p: Partial<BookingPayload>): string[] {

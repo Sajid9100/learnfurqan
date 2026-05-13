@@ -6,7 +6,7 @@ import { Logo } from "./ui/Logo";
 const COLUMNS = [
   {
     title: "Platform",
-    links: ["How it Works", "Courses", "Pricing", "Free Trial"],
+    links: ["How it Works", "Courses", "Browse Teachers", "Free Trial"],
   },
   {
     title: "For Teachers",
