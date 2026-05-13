@@ -31,16 +31,54 @@ create table if not exists teachers (
   teaching_style    text,
   certifications    text,
   intro_video_url   text default '',
-  available_slots   text[] default '{}',
+  available_slots   text[] default '{}', -- DEPRECATED: kept for fallback display. New flow uses teacher_availability_rules.
   is_featured       boolean default false,
   slug              text unique not null,
   is_active         boolean default true,
+  class_duration_minutes int not null default 30
+                      check (class_duration_minutes in (15, 30, 45, 60, 90)),
   created_at        timestamptz default now()
 );
 
 create index if not exists teachers_is_active_idx on teachers (is_active);
 create index if not exists teachers_is_featured_idx on teachers (is_featured);
 create index if not exists teachers_gender_idx on teachers (gender);
+
+-- ============================================================
+-- TEACHER AVAILABILITY — recurring weekly rules + exceptions
+-- ============================================================
+create table if not exists teacher_availability_rules (
+  id          uuid primary key default gen_random_uuid(),
+  teacher_id  uuid not null references teachers(id) on delete cascade,
+  weekday     int not null check (weekday between 0 and 6), -- 0=Sun..6=Sat
+  start_time  time not null,
+  end_time    time not null,
+  timezone    text not null, -- IANA tz id, e.g. 'Africa/Cairo'
+  is_active   boolean default true,
+  created_at  timestamptz default now(),
+  check (end_time > start_time)
+);
+create index if not exists teacher_availability_rules_teacher_idx
+  on teacher_availability_rules (teacher_id);
+create index if not exists teacher_availability_rules_active_idx
+  on teacher_availability_rules (teacher_id, weekday) where is_active;
+
+-- 'block' removes a slot for one date (vacation); 'extra' adds an extra one-off window.
+create table if not exists teacher_availability_exceptions (
+  id              uuid primary key default gen_random_uuid(),
+  teacher_id      uuid not null references teachers(id) on delete cascade,
+  exception_date  date not null,
+  kind            text not null check (kind in ('block','extra')),
+  start_time      time,
+  end_time        time,
+  timezone        text,
+  notes           text default '',
+  created_at      timestamptz default now(),
+  check (kind = 'block' or (start_time is not null and end_time is not null and timezone is not null)),
+  check (start_time is null or end_time is null or end_time > start_time)
+);
+create index if not exists teacher_availability_exceptions_teacher_date_idx
+  on teacher_availability_exceptions (teacher_id, exception_date);
 
 -- ============================================================
 -- BOOKINGS
@@ -62,7 +100,7 @@ create table if not exists bookings (
                         check (status in ('pending','confirmed','completed','cancelled')),
   stripe_session_id   text default '',
   payment_status      text default 'free_trial'
-                        check (payment_status in ('free_trial','paid','refunded')),
+                        check (payment_status in ('free_trial','pending','paid','refunded')),
   zoom_link           text default '',
   created_at          timestamptz default now()
 );

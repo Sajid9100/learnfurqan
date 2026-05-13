@@ -5,6 +5,7 @@ import { Search, Video, CheckCircle2, XCircle, Check } from "lucide-react";
 import type { Booking } from "@/lib/types";
 import { Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
+import { formatBookingSlot } from "@/lib/utils";
 
 type FilterStatus = "all" | Booking["status"];
 
@@ -144,7 +145,7 @@ export function BookingsClient() {
                       {b.teacher_name}
                     </td>
                     <td className="px-4 py-3 text-foreground">
-                      {b.selected_slot}
+                      {formatBookingSlot(b.selected_slot)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       <div className="capitalize">{b.age_group}</div>
@@ -311,7 +312,7 @@ function ZoomModal({
           </div>
           <div>
             <span className="text-muted-foreground">Slot: </span>
-            <span className="font-medium">{booking.selected_slot}</span>
+            <span className="font-medium">{formatBookingSlot(booking.selected_slot)}</span>
           </div>
         </div>
         <div>

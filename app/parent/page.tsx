@@ -8,6 +8,7 @@ import {
   summarizeBookings,
 } from "@/lib/parent-data";
 import { CLASSES_GOAL, type Booking, type ParentChild } from "@/lib/types";
+import { formatBookingSlot } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -99,7 +100,7 @@ function ChildCard({
         <div className="flex items-center gap-2 text-muted-foreground">
           <Calendar className="h-4 w-4 flex-none text-primary/70" />
           <span className="truncate">
-            {summary.next?.selected_slot || "No upcoming class"}
+            {summary.next ? formatBookingSlot(summary.next.selected_slot) : "No upcoming class"}
           </span>
         </div>
       </div>

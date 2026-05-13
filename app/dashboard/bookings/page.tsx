@@ -6,6 +6,7 @@ import {
   createServerSupabaseClient,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase";
+import { formatBookingSlot } from "@/lib/utils";
 import type { Booking } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -88,7 +89,7 @@ function BookingRow({ booking: b }: { booking: Booking }) {
     <tr>
       <td className="px-4 py-3 font-medium text-foreground">{b.teacher_name}</td>
       <td className="px-4 py-3 text-muted-foreground">{b.teacher_slug}</td>
-      <td className="px-4 py-3 text-foreground">{b.selected_slot}</td>
+      <td className="px-4 py-3 text-foreground">{formatBookingSlot(b.selected_slot)}</td>
       <td className="px-4 py-3">
         <StatusBadge status={b.status} />
       </td>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { SlotPicker } from "./SlotPicker";
 import { cn } from "@/lib/utils";
 import type { Teacher, AgeGroup, StudentLevel as Level } from "@/lib/types";
 
@@ -296,44 +297,12 @@ export function BookingForm({ teacher }: { teacher: Teacher }) {
           required
           error={errors.selectedSlot}
         >
-          <div className="grid gap-2 sm:grid-cols-2">
-            {teacher.available_slots.map((slot) => {
-              const checked = form.selectedSlot === slot;
-              return (
-                <label
-                  key={slot}
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-all",
-                    checked
-                      ? "border-primary bg-primary/5 text-foreground shadow-soft"
-                      : "border-border bg-white text-foreground/80 hover:border-primary/40"
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="selectedSlot"
-                    value={slot}
-                    checked={checked}
-                    onChange={() => update("selectedSlot", slot)}
-                    className="sr-only"
-                  />
-                  <span
-                    className={cn(
-                      "flex h-4 w-4 flex-none items-center justify-center rounded-full border-2 transition-colors",
-                      checked
-                        ? "border-primary bg-primary"
-                        : "border-border bg-white"
-                    )}
-                  >
-                    {checked && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                    )}
-                  </span>
-                  {slot}
-                </label>
-              );
-            })}
-          </div>
+          <SlotPicker
+            teacherSlug={teacher.slug}
+            value={form.selectedSlot}
+            onChange={(iso) => update("selectedSlot", iso)}
+            error={errors.selectedSlot}
+          />
         </Field>
 
         <Field

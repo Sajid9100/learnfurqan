@@ -21,6 +21,7 @@ import {
   type Booking,
   type ParentChild,
 } from "@/lib/types";
+import { formatBookingSlot } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -161,7 +162,7 @@ export default async function ChildDetailPage({
                 <div className="mt-3 rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                   Next class:{" "}
                   <span className="font-medium text-foreground">
-                    {summary.next?.selected_slot || "Not scheduled"}
+                    {summary.next ? formatBookingSlot(summary.next.selected_slot) : "Not scheduled"}
                   </span>
                 </div>
                 <a

@@ -9,7 +9,7 @@ import type { Teacher } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ALLOWED: (keyof Teacher | "is_active")[] = [
+const ALLOWED: (keyof Teacher | "is_active" | "class_duration_minutes")[] = [
   "name",
   "gender",
   "subject",
@@ -28,6 +28,7 @@ const ALLOWED: (keyof Teacher | "is_active")[] = [
   "is_featured",
   "slug",
   "is_active",
+  "class_duration_minutes",
 ];
 
 export async function PATCH(
@@ -64,7 +65,13 @@ export async function PATCH(
   }
 
   // Coerce numeric fields when present
-  for (const k of ["experience_years", "price_per_class", "rating", "review_count"]) {
+  for (const k of [
+    "experience_years",
+    "price_per_class",
+    "rating",
+    "review_count",
+    "class_duration_minutes",
+  ]) {
     if (k in update) update[k] = Number(update[k]);
   }
 

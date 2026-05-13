@@ -4,6 +4,7 @@ import {
   createServerSupabaseClient,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase";
+import { formatBookingSlot } from "@/lib/utils";
 import type { Booking } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -141,7 +142,7 @@ export default async function DashboardPage() {
                       {b.teacher_name}
                     </td>
                     <td className="px-3 py-3 text-foreground">
-                      {b.selected_slot}
+                      {formatBookingSlot(b.selected_slot)}
                     </td>
                     <td className="px-3 py-3">
                       <StatusBadge status={b.status} />

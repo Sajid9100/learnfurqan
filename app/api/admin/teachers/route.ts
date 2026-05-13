@@ -94,6 +94,10 @@ export async function POST(req: Request) {
     is_featured: Boolean(body.is_featured),
     slug: body.slug!.trim(),
     is_active: body.is_active === false ? false : true,
+    class_duration_minutes:
+      body.class_duration_minutes !== undefined
+        ? Number(body.class_duration_minutes)
+        : 30,
   };
 
   const admin = createServerSupabaseClient();

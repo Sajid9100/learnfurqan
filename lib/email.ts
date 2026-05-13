@@ -87,7 +87,7 @@ function renderStudentEmail(p: BookingEmailPayload): string {
         <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:16px;overflow:hidden;background:#ECFDF5">
           ${row("Teacher", escapeHtml(p.teacher.name))}
           ${row("Subject", escapeHtml(p.teacher.subject))}
-          ${row("Your selected slot", escapeHtml(p.selectedSlot))}
+          ${row("Your selected slot", escapeHtml(formatSlot(p.selectedSlot)))}
         </table>
 
         <p style="margin:0 0 8px;font-size:15px;line-height:1.6">We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.</p>
@@ -107,7 +107,7 @@ function renderStudentEmailText(p: BookingEmailPayload): string {
     ``,
     `Teacher: ${p.teacher.name}`,
     `Subject: ${p.teacher.subject}`,
-    `Your selected slot: ${p.selectedSlot}`,
+    `Your selected slot: ${formatSlot(p.selectedSlot)}`,
     ``,
     `We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.`,
     ``,
@@ -133,7 +133,7 @@ function renderAdminEmail(p: BookingEmailPayload): string {
           ${row("Level", escapeHtml(p.currentLevel))}
           ${row("Teacher", escapeHtml(p.teacher.name))}
           ${row("Subject", escapeHtml(p.teacher.subject))}
-          ${row("Selected slot", escapeHtml(p.selectedSlot))}
+          ${row("Selected slot", escapeHtml(formatSlot(p.selectedSlot)))}
           ${row("Message", escapeHtml(p.message || "—"))}
         </table>
       </td></tr>
@@ -153,7 +153,7 @@ function renderAdminEmailText(p: BookingEmailPayload): string {
     `Level:         ${p.currentLevel}`,
     `Teacher:       ${p.teacher.name}`,
     `Subject:       ${p.teacher.subject}`,
-    `Selected slot: ${p.selectedSlot}`,
+    `Selected slot: ${formatSlot(p.selectedSlot)}`,
     `Message:       ${p.message || "—"}`,
   ].join("\n");
 }
@@ -198,7 +198,7 @@ function renderZoomLinkEmail(p: ZoomLinkEmailPayload): string {
 
         <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:16px;overflow:hidden;background:#ECFDF5">
           ${row("Teacher", escapeHtml(p.teacherName))}
-          ${row("Time", escapeHtml(p.selectedSlot))}
+          ${row("Time", escapeHtml(formatSlot(p.selectedSlot)))}
         </table>
 
         <p style="margin:24px 0;text-align:center">
@@ -219,7 +219,7 @@ function renderZoomLinkEmailText(p: ZoomLinkEmailPayload): string {
     `Your trial class has been confirmed!`,
     ``,
     `Teacher: ${p.teacherName}`,
-    `Time: ${p.selectedSlot}`,
+    `Time: ${formatSlot(p.selectedSlot)}`,
     ``,
     `Join Zoom: ${p.zoomLink}`,
     ``,
@@ -519,6 +519,23 @@ function renderSubscriptionPaymentFailedEmailText(
     ``,
     `The LearnFurqan Team`,
   ].join("\n");
+}
+
+// Renders an ISO timestamp as a human-readable string in UTC. Falls back to
+// the raw input for legacy free-text slots (e.g. "Mon 9am UTC").
+function formatSlot(raw: string): string {
+  const d = new Date(raw);
+  if (!Number.isFinite(d.getTime())) return raw;
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  }).format(d);
 }
 
 function row(label: string, value: string) {

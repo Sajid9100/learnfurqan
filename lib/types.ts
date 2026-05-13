@@ -17,6 +17,42 @@ export type Teacher = {
   available_slots: string[];
   is_featured: boolean;
   slug: string;
+  class_duration_minutes?: number;
+};
+
+// 0 = Sunday … 6 = Saturday (matches JavaScript Date.getDay()).
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export type TeacherAvailabilityRule = {
+  id: string;
+  teacher_id: string;
+  weekday: Weekday;
+  start_time: string; // "HH:MM:SS" in `timezone`
+  end_time: string;
+  timezone: string; // IANA tz, e.g. "Africa/Cairo"
+  is_active: boolean;
+  created_at: string;
+};
+
+export type TeacherAvailabilityException = {
+  id: string;
+  teacher_id: string;
+  exception_date: string; // YYYY-MM-DD in `timezone` (when set)
+  kind: "block" | "extra";
+  start_time: string | null;
+  end_time: string | null;
+  timezone: string | null;
+  notes: string;
+  created_at: string;
+};
+
+export type AvailabilitySlot = {
+  // ISO 8601 timestamp (UTC) for the start of the slot.
+  start: string;
+  // ISO 8601 timestamp (UTC) for the end of the slot.
+  end: string;
+  // Duration in minutes — same as teacher.class_duration_minutes at fetch time.
+  duration_minutes: number;
 };
 
 export type AgeGroup = "child" | "teen" | "adult";

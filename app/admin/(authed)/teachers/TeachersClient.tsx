@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, CalendarClock } from "lucide-react";
 import type { Teacher } from "@/lib/types";
 import { Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
 import { Flag } from "@/components/ui/Flag";
+import { TeacherAvailabilityModal } from "./TeacherAvailabilityModal";
 
 type TeacherRow = Teacher & { is_active?: boolean };
 
@@ -28,6 +29,7 @@ const EMPTY_FORM: TeacherFormState = {
   is_featured: false,
   slug: "",
   is_active: true,
+  class_duration_minutes: 30,
 };
 
 type TeacherFormState = {
@@ -49,6 +51,7 @@ type TeacherFormState = {
   is_featured: boolean;
   slug: string;
   is_active: boolean;
+  class_duration_minutes: number;
 };
 
 export function TeachersClient() {
@@ -57,6 +60,9 @@ export function TeachersClient() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<TeacherRow | null>(null);
   const [adding, setAdding] = useState(false);
+  const [availabilityFor, setAvailabilityFor] = useState<TeacherRow | null>(
+    null
+  );
   const toast = useToast();
 
   useEffect(() => {
@@ -157,7 +163,7 @@ export function TeachersClient() {
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Rating</th>
                   <th className="px-4 py-3">Active</th>
-                  <th className="px-4 py-3 text-right">Edit</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -190,14 +196,24 @@ export function TeachersClient() {
                       />
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setEditing(t)}
-                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
-                      </button>
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setAvailabilityFor(t)}
+                          className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                        >
+                          <CalendarClock className="h-3.5 w-3.5" />
+                          Availability
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(t)}
+                          className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-foreground hover:border-primary hover:text-primary"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -231,6 +247,13 @@ export function TeachersClient() {
           setAdding(false);
         }}
       />
+
+      {availabilityFor && (
+        <TeacherAvailabilityModal
+          teacher={availabilityFor}
+          onClose={() => setAvailabilityFor(null)}
+        />
+      )}
     </div>
   );
 }
@@ -285,6 +308,7 @@ function rowToForm(t: TeacherRow): TeacherFormState {
     is_featured: t.is_featured,
     slug: t.slug,
     is_active: t.is_active ?? true,
+    class_duration_minutes: t.class_duration_minutes ?? 30,
   };
 }
 
@@ -311,6 +335,7 @@ function formToPayload(f: TeacherFormState): Partial<Teacher> & { is_active: boo
     is_featured: f.is_featured,
     slug: f.slug.trim(),
     is_active: f.is_active,
+    class_duration_minutes: Number(f.class_duration_minutes) || 30,
   };
 }
 
@@ -450,6 +475,21 @@ function TeacherFormModal({
                 set("price_per_class", Number(e.target.value))
               }
             />
+          </Field>
+          <Field label="Class duration (minutes)">
+            <select
+              className={inputCls}
+              value={form.class_duration_minutes}
+              onChange={(e) =>
+                set("class_duration_minutes", Number(e.target.value))
+              }
+            >
+              {[15, 30, 45, 60, 90].map((m) => (
+                <option key={m} value={m}>
+                  {m} min
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Rating (0–5)">
             <input

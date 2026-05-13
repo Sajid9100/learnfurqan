@@ -4,6 +4,8 @@ import type {
   BookingInsert,
   Teacher,
   TeacherApplicationInsert,
+  TeacherAvailabilityException,
+  TeacherAvailabilityRule,
   TeacherFilters,
 } from "./types";
 
@@ -120,6 +122,78 @@ export async function hasPriorBookingWithTeacher(
     return false;
   }
   return (data?.length ?? 0) > 0;
+}
+
+export async function getAvailabilityRules(
+  teacherId: string
+): Promise<TeacherAvailabilityRule[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("teacher_availability_rules")
+    .select("*")
+    .eq("teacher_id", teacherId)
+    .eq("is_active", true);
+  if (error) {
+    console.warn("[supabase] getAvailabilityRules failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as TeacherAvailabilityRule[];
+}
+
+export async function getAvailabilityExceptions(
+  teacherId: string,
+  fromDate: string,
+  toDate: string
+): Promise<TeacherAvailabilityException[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("teacher_availability_exceptions")
+    .select("*")
+    .eq("teacher_id", teacherId)
+    .gte("exception_date", fromDate)
+    .lte("exception_date", toDate);
+  if (error) {
+    console.warn("[supabase] getAvailabilityExceptions failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as TeacherAvailabilityException[];
+}
+
+// Returns occupied slot ranges (ISO start/end) for a teacher within [from, to].
+// Used to filter out already-booked times when computing availability.
+export async function getBookedRangesForTeacher(
+  teacherId: string,
+  fromIso: string,
+  toIso: string,
+  classDurationMinutes: number
+): Promise<Array<{ start: Date; end: Date }>> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("selected_slot")
+    .eq("teacher_id", teacherId)
+    .neq("status", "cancelled")
+    .gte("selected_slot", fromIso)
+    .lte("selected_slot", toIso);
+  if (error) {
+    console.warn("[supabase] getBookedRangesForTeacher failed:", error.message);
+    return [];
+  }
+  const out: Array<{ start: Date; end: Date }> = [];
+  for (const row of data ?? []) {
+    const raw = (row as { selected_slot: string }).selected_slot;
+    const start = parseSlotStart(raw);
+    if (!start) continue;
+    const end = new Date(start.getTime() + classDurationMinutes * 60_000);
+    out.push({ start, end });
+  }
+  return out;
+}
+
+function parseSlotStart(raw: string): Date | null {
+  const d = new Date(raw);
+  if (Number.isFinite(d.getTime())) return d;
+  return null;
 }
 
 export async function createTeacherApplication(

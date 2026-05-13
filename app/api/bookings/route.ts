@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import {
   createBooking,
+  getAvailabilityExceptions,
+  getAvailabilityRules,
+  getBookedRangesForTeacher,
   getTeacherBySlug,
   hasPriorBookingWithTeacher,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase";
+import { expandAvailability } from "@/lib/availability";
 import { sendBookingConfirmationEmails } from "@/lib/email";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import type { AgeGroup, StudentLevel, Teacher } from "@/lib/types";
@@ -52,10 +56,52 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!teacher.available_slots.includes(body.selected_slot!)) {
+  const slotDate = parseIso(body.selected_slot!);
+  if (!slotDate) {
     return NextResponse.json(
-      { error: "Selected slot is not available for this teacher" },
+      { error: "selected_slot must be an ISO 8601 timestamp" },
       { status: 400 }
+    );
+  }
+  if (slotDate.getTime() <= Date.now()) {
+    return NextResponse.json(
+      { error: "selected_slot must be in the future" },
+      { status: 400 }
+    );
+  }
+
+  // Race-safe availability check: re-expand availability at insert time and
+  // confirm the chosen slot is still bookable.
+  const duration = teacher.class_duration_minutes ?? 30;
+  const windowStart = new Date(slotDate.getTime() - 60_000);
+  const windowEnd = new Date(slotDate.getTime() + duration * 60_000 + 60_000);
+  const [rules, exceptions, booked] = await Promise.all([
+    getAvailabilityRules(teacher.id),
+    getAvailabilityExceptions(
+      teacher.id,
+      windowStart.toISOString().slice(0, 10),
+      windowEnd.toISOString().slice(0, 10)
+    ),
+    getBookedRangesForTeacher(
+      teacher.id,
+      windowStart.toISOString(),
+      windowEnd.toISOString(),
+      duration
+    ),
+  ]);
+  const available = expandAvailability({
+    rules,
+    exceptions,
+    classDurationMinutes: duration,
+    from: windowStart,
+    to: windowEnd,
+    bookedRanges: booked,
+  });
+  const matched = available.find((s) => s.start === slotDate.toISOString());
+  if (!matched) {
+    return NextResponse.json(
+      { error: "Selected slot is no longer available" },
+      { status: 409 }
     );
   }
 
@@ -79,7 +125,7 @@ export async function POST(req: Request) {
       student_country: body.student_country!.trim(),
       age_group: body.age_group!,
       current_level: body.current_level!,
-      selected_slot: body.selected_slot!,
+      selected_slot: slotDate.toISOString(),
       message: (body.message ?? "").trim(),
       payment_status: requiresPayment ? "pending" : "free_trial",
     });
@@ -111,7 +157,7 @@ export async function POST(req: Request) {
       studentCountry: body.student_country!.trim(),
       ageGroup: body.age_group!,
       currentLevel: body.current_level!,
-      selectedSlot: body.selected_slot!,
+      selectedSlot: slotDate.toISOString(),
       message: (body.message ?? "").trim(),
       teacher,
     }).catch((err) => {
@@ -189,6 +235,11 @@ async function createBookingCheckoutSession(args: {
   }
 
   return { url: session.url };
+}
+
+function parseIso(s: string): Date | null {
+  const d = new Date(s);
+  return Number.isFinite(d.getTime()) ? d : null;
 }
 
 function validate(p: Partial<BookingPayload>): string[] {
