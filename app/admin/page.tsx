@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
             LearnFurqan Admin
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Enter your password to access the dashboard.
+            Enter your email and password to access the dashboard.
           </p>
         </div>
         <LoginForm />

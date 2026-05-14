@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function LoginForm() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export function LoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -38,6 +39,26 @@ export function LoginForm() {
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label
+          htmlFor="admin-email"
+          className="mb-1.5 block text-sm font-medium text-foreground"
+        >
+          Email
+        </label>
+        <input
+          id="admin-email"
+          type="email"
+          required
+          autoFocus
+          autoComplete="username"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <div>
+        <label
           htmlFor="admin-password"
           className="mb-1.5 block text-sm font-medium text-foreground"
         >
@@ -47,7 +68,6 @@ export function LoginForm() {
           id="admin-password"
           type="password"
           required
-          autoFocus
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +87,7 @@ export function LoginForm() {
         variant="primary"
         size="lg"
         className="w-full"
-        disabled={loading || password.length === 0}
+        disabled={loading || email.length === 0 || password.length === 0}
       >
         {loading ? "Logging in…" : "Login"}
       </Button>

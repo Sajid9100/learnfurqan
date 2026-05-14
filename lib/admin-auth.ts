@@ -54,6 +54,18 @@ export function checkAdminPassword(input: string): boolean {
   }
 }
 
+export function checkAdminEmail(input: string): boolean {
+  const expected = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  if (!expected) return false;
+  const normalized = input.trim().toLowerCase();
+  if (normalized.length !== expected.length) return false;
+  try {
+    return timingSafeEqual(Buffer.from(normalized), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
+
 export function isAdminRequest(): boolean {
   const token = cookies().get(ADMIN_COOKIE)?.value;
   return verifyAdminToken(token);
