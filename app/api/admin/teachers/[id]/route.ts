@@ -29,7 +29,10 @@ const ALLOWED: (keyof Teacher | "is_active" | "class_duration_minutes")[] = [
   "slug",
   "is_active",
   "class_duration_minutes",
+  "email",
 ];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function PATCH(
   req: Request,
@@ -73,6 +76,22 @@ export async function PATCH(
     "class_duration_minutes",
   ]) {
     if (k in update) update[k] = Number(update[k]);
+  }
+
+  // Normalize / validate email — empty string becomes null so the unique
+  // index doesn't reject the row.
+  if ("email" in update) {
+    const raw = String(update.email ?? "").trim().toLowerCase();
+    if (!raw) {
+      update.email = null;
+    } else if (!EMAIL_RE.test(raw)) {
+      return NextResponse.json(
+        { error: "email is invalid" },
+        { status: 400 }
+      );
+    } else {
+      update.email = raw;
+    }
   }
 
   const admin = createServerSupabaseClient();

@@ -33,6 +33,7 @@ export type BookingEmailPayload = {
   selectedSlot: string;
   message: string;
   teacher: Teacher;
+  zoomLink?: string;
 };
 
 export async function sendBookingConfirmationEmails(
@@ -90,7 +91,16 @@ function renderStudentEmail(p: BookingEmailPayload): string {
           ${row("Your selected slot", escapeHtml(formatSlot(p.selectedSlot)))}
         </table>
 
-        <p style="margin:0 0 8px;font-size:15px;line-height:1.6">We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.</p>
+        ${
+          p.zoomLink
+            ? `<p style="margin:24px 0;text-align:center"><a href="${escapeHtml(
+                p.zoomLink
+              )}" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Join Zoom Class</a></p>
+        <p style="margin:0 0 16px;font-size:13px;color:#64748B;word-break:break-all">Or copy this link: ${escapeHtml(
+          p.zoomLink
+        )}</p>`
+            : `<p style="margin:0 0 8px;font-size:15px;line-height:1.6">We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.</p>`
+        }
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6">If you have any questions, reply to this email or WhatsApp us at: <strong>+1 (555) 000-0000</strong>.</p>
 
         <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The LearnFurqan Team</strong></p>
@@ -109,7 +119,9 @@ function renderStudentEmailText(p: BookingEmailPayload): string {
     `Subject: ${p.teacher.subject}`,
     `Your selected slot: ${formatSlot(p.selectedSlot)}`,
     ``,
-    `We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.`,
+    p.zoomLink
+      ? `Join Zoom: ${p.zoomLink}`
+      : `We will send you the Zoom link within 2 hours. The teacher will also confirm your booking shortly.`,
     ``,
     `If you have any questions, reply to this email or WhatsApp us at: +1 (555) 000-0000`,
     ``,
@@ -226,6 +238,177 @@ function renderZoomLinkEmailText(p: ZoomLinkEmailPayload): string {
     `See you in class!`,
     `The LearnFurqan Team`,
   ].join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Booking cancellation — sent when a parent/teacher cancels an upcoming class
+// ---------------------------------------------------------------------------
+export type BookingCancelledEmailPayload = {
+  studentName: string;
+  studentEmail: string;
+  teacherName: string;
+  selectedSlot: string;
+  cancelledBy: "student" | "teacher";
+  refunded: boolean;
+};
+
+export async function sendBookingCancelledEmail(
+  payload: BookingCancelledEmailPayload
+) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping cancel email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: "Your LearnFurqan class has been cancelled",
+    html: renderBookingCancelledEmail(payload),
+    text: renderBookingCancelledEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderBookingCancelledEmail(p: BookingCancelledEmailPayload): string {
+  const lede =
+    p.cancelledBy === "teacher"
+      ? `Your teacher had to cancel the class below.`
+      : `Your class has been cancelled.`;
+  const refundLine = p.refunded
+    ? `A full refund has been issued and will appear on your statement within 5–10 business days.`
+    : "";
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px 32px 0">
+        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">LearnFurqan</h1>
+      </td></tr>
+      <tr><td style="padding:24px 32px">
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName)},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">${lede}</p>
+
+        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:16px;overflow:hidden;background:#FEF2F2">
+          ${row("Teacher", escapeHtml(p.teacherName))}
+          ${row("Time", escapeHtml(formatSlot(p.selectedSlot)))}
+        </table>
+
+        ${refundLine ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.6">${escapeHtml(refundLine)}</p>` : ""}
+
+        <p style="margin:16px 0;text-align:center">
+          <a href="https://learnfurqan.com/teachers" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Book another class</a>
+        </p>
+
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The LearnFurqan Team</strong></p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderBookingCancelledEmailText(
+  p: BookingCancelledEmailPayload
+): string {
+  return [
+    `Assalamu Alaikum ${p.studentName},`,
+    ``,
+    p.cancelledBy === "teacher"
+      ? `Your teacher had to cancel the class below.`
+      : `Your class has been cancelled.`,
+    ``,
+    `Teacher: ${p.teacherName}`,
+    `Time: ${formatSlot(p.selectedSlot)}`,
+    ``,
+    p.refunded
+      ? `A full refund has been issued and will appear on your statement within 5–10 business days.`
+      : ``,
+    `Book another class: https://learnfurqan.com/teachers`,
+    ``,
+    `JazakAllah Khair,`,
+    `The LearnFurqan Team`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Booking rescheduled — sent when a class is moved to a new slot
+// ---------------------------------------------------------------------------
+export type BookingRescheduledEmailPayload = {
+  studentName: string;
+  studentEmail: string;
+  teacherName: string;
+  previousSlot: string;
+  newSlot: string;
+  zoomLink?: string;
+};
+
+export async function sendBookingRescheduledEmail(
+  payload: BookingRescheduledEmailPayload
+) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping reschedule email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: payload.studentEmail,
+    subject: "Your LearnFurqan class has been rescheduled",
+    html: renderBookingRescheduledEmail(payload),
+    text: renderBookingRescheduledEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderBookingRescheduledEmail(
+  p: BookingRescheduledEmailPayload
+): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:32px 32px 0">
+        <h1 style="margin:0;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:24px;font-weight:700">LearnFurqan</h1>
+      </td></tr>
+      <tr><td style="padding:24px 32px">
+        <p style="margin:0 0 16px;font-size:16px"><strong>Assalamu Alaikum ${escapeHtml(p.studentName)},</strong></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.6">Your class has been moved to a new time.</p>
+
+        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;border-radius:16px;overflow:hidden;background:#ECFDF5">
+          ${row("Teacher", escapeHtml(p.teacherName))}
+          ${row("Previous time", escapeHtml(formatSlot(p.previousSlot)))}
+          ${row("New time", `<strong>${escapeHtml(formatSlot(p.newSlot))}</strong>`)}
+        </table>
+
+        ${
+          p.zoomLink
+            ? `<p style="margin:24px 0;text-align:center"><a href="${escapeHtml(p.zoomLink)}" style="display:inline-block;background:#0F766E;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:15px">Join Zoom Class</a></p>`
+            : ""
+        }
+
+        <p style="margin:24px 0 0;font-size:15px">JazakAllah Khair,<br/><strong>The LearnFurqan Team</strong></p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderBookingRescheduledEmailText(
+  p: BookingRescheduledEmailPayload
+): string {
+  return [
+    `Assalamu Alaikum ${p.studentName},`,
+    ``,
+    `Your class has been moved to a new time.`,
+    ``,
+    `Teacher: ${p.teacherName}`,
+    `Previous time: ${formatSlot(p.previousSlot)}`,
+    `New time:      ${formatSlot(p.newSlot)}`,
+    ``,
+    p.zoomLink ? `Join Zoom: ${p.zoomLink}` : ``,
+    `JazakAllah Khair,`,
+    `The LearnFurqan Team`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 // ---------------------------------------------------------------------------

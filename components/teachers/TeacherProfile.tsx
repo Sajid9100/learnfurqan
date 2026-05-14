@@ -16,39 +16,23 @@ import {
 import { TeacherAvatar } from "./TeacherAvatar";
 import { Button } from "@/components/ui/button";
 import { Flag } from "@/components/ui/Flag";
-import type { Teacher } from "@/lib/types";
-
-const REVIEWS = [
-  {
-    initials: "OS",
-    name: "Omar S.",
-    location: "United Kingdom",
-    quote:
-      "Ustadh Ahmad completely transformed my Tajweed. I had bad habits for years and he corrected them all within 3 months.",
-  },
-  {
-    initials: "FA",
-    name: "Fatima A.",
-    location: "Canada",
-    quote:
-      "Very professional and punctual. My son looks forward to every class.",
-  },
-  {
-    initials: "IK",
-    name: "Ibrahim K.",
-    location: "USA",
-    quote: "Alhamdulillah, exactly what I was looking for.",
-  },
-];
+import type { Review, Teacher } from "@/lib/types";
 
 const fade = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
 
-export function TeacherProfile({ teacher }: { teacher: Teacher }) {
+export function TeacherProfile({
+  teacher,
+  reviews,
+}: {
+  teacher: Teacher;
+  reviews: Review[];
+}) {
   const languages = teacher.language.split(",").map((l) => l.trim());
   const studentEstimate = Math.max(40, teacher.review_count * 2);
+  const hasReviews = teacher.review_count > 0;
 
   return (
     <div className="container py-10 md:py-16">
@@ -79,17 +63,26 @@ export function TeacherProfile({ teacher }: { teacher: Teacher }) {
                 </span>
 
                 <div className="mt-4 flex items-center gap-1.5 text-sm">
-                  <div className="flex items-center gap-0.5 text-accent">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="font-semibold text-foreground">
-                    {teacher.rating.toFixed(1)}
-                  </span>
-                  <span className="text-muted-foreground">
-                    ({teacher.review_count} reviews)
-                  </span>
+                  {hasReviews ? (
+                    <>
+                      <div className="flex items-center gap-0.5 text-accent">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-current" />
+                        ))}
+                      </div>
+                      <span className="font-semibold text-foreground">
+                        {teacher.rating.toFixed(1)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ({teacher.review_count} review
+                        {teacher.review_count === 1 ? "" : "s"})
+                      </span>
+                    </>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      New teacher
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -207,45 +200,94 @@ export function TeacherProfile({ teacher }: { teacher: Teacher }) {
           </Section>
 
           <Section title="Student reviews">
-            <div className="grid gap-4 md:grid-cols-3">
-              {REVIEWS.map((r) => (
-                <article
-                  key={r.name}
-                  className="relative flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-soft"
-                >
-                  <Quote
-                    className="absolute right-5 top-5 h-7 w-7 text-primary/10"
-                    aria-hidden
-                  />
-                  <div className="flex items-center gap-1 text-accent">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                    ))}
-                  </div>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground/85">
-                    “{r.quote}”
-                  </p>
-                  <div className="mt-4 flex items-center gap-3 border-t border-border/70 pt-4">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                      {r.initials}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {r.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {r.location}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            {reviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No reviews yet. Be the first to take a class with{" "}
+                {teacher.name.split(" ").slice(-1)[0]} and share how it went.
+              </p>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-3">
+                {reviews.map((r) => (
+                  <ReviewCard key={r.id} review={r} />
+                ))}
+              </div>
+            )}
           </Section>
         </motion.div>
       </div>
     </div>
   );
+}
+
+function ReviewCard({ review }: { review: Review }) {
+  return (
+    <article className="relative flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-soft">
+      <Quote
+        className="absolute right-5 top-5 h-7 w-7 text-primary/10"
+        aria-hidden
+      />
+      <div className="flex items-center gap-1 text-accent">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={
+              "h-3.5 w-3.5 " +
+              (i < review.rating ? "fill-current" : "text-muted-foreground/30")
+            }
+          />
+        ))}
+      </div>
+      {review.comment ? (
+        <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground/85">
+          “{review.comment}”
+        </p>
+      ) : (
+        <p className="mt-3 flex-1 text-sm italic text-muted-foreground">
+          (No comment)
+        </p>
+      )}
+      <div className="mt-4 flex items-center gap-3 border-t border-border/70 pt-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+          {initials(review.student_name)}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground">
+            {firstNameLastInitial(review.student_name)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatReviewDate(review.created_at)}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function firstNameLastInitial(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Anonymous";
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
+function formatReviewDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
 }
 
 function Section({

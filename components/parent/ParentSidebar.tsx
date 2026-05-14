@@ -6,6 +6,7 @@ import { useState } from "react";
 import {
   Users,
   UserPlus,
+  MessageSquare,
   Settings,
   Menu,
   X,
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/parent", label: "My Children", icon: Users },
+  { href: "/parent/messages", label: "Messages", icon: MessageSquare },
   { href: "/parent/add-child", label: "Add Child", icon: UserPlus },
   { href: "/parent/settings", label: "Settings", icon: Settings },
 ];

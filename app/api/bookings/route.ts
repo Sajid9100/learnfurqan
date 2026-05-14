@@ -8,10 +8,16 @@ import {
   getTeacherBySlug,
   hasPriorBookingWithTeacher,
   isSupabaseAdminConfigured,
+  setBookingZoomLink,
 } from "@/lib/supabase";
 import { expandAvailability } from "@/lib/availability";
 import { sendBookingConfirmationEmails } from "@/lib/email";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
+import { createScheduledMeeting, isZoomConfigured } from "@/lib/zoom";
+import {
+  computeApplicationFeeCents,
+  teacherCanReceivePayouts,
+} from "@/lib/stripe-connect";
 import type { AgeGroup, StudentLevel, Teacher } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -148,8 +154,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Free trial — send confirmation emails now. Paid bookings only get
-    // emails after the Stripe webhook flips the row to "paid".
+    // Free trial — auto-generate Zoom link (best-effort) then send
+    // confirmation emails. Paid bookings only get emails after the Stripe
+    // webhook flips the row to "paid".
+    const zoomLink = await maybeGenerateZoomLink({
+      bookingId: id,
+      teacher,
+      studentName,
+      slot: slotDate,
+    });
+
     sendBookingConfirmationEmails({
       studentName,
       studentEmail,
@@ -160,6 +174,7 @@ export async function POST(req: Request) {
       selectedSlot: slotDate.toISOString(),
       message: (body.message ?? "").trim(),
       teacher,
+      zoomLink,
     }).catch((err) => {
       console.error("[bookings] email send failed", err);
     });
@@ -174,6 +189,30 @@ export async function POST(req: Request) {
       { error: "Could not save booking. Please try again." },
       { status: 500 }
     );
+  }
+}
+
+// Best-effort: create a Zoom meeting and persist the join link on the booking.
+// Returns the join URL on success, undefined when Zoom is unconfigured or the
+// API call failed. Failures are logged but never break the booking flow.
+async function maybeGenerateZoomLink(args: {
+  bookingId: string;
+  teacher: Teacher;
+  studentName: string;
+  slot: Date;
+}): Promise<string | undefined> {
+  if (!isZoomConfigured) return undefined;
+  try {
+    const meeting = await createScheduledMeeting({
+      topic: `${args.teacher.name} × ${args.studentName} — LearnFurqan`,
+      startTime: args.slot.toISOString(),
+      durationMinutes: args.teacher.class_duration_minutes ?? 30,
+    });
+    await setBookingZoomLink(args.bookingId, meeting.joinUrl);
+    return meeting.joinUrl;
+  } catch (err) {
+    console.error("[bookings] zoom auto-gen failed", err);
+    return undefined;
   }
 }
 
@@ -194,6 +233,28 @@ async function createBookingCheckoutSession(args: {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const stripe = getStripe();
+
+  type PaymentIntentData = NonNullable<
+    Stripe.Checkout.SessionCreateParams["payment_intent_data"]
+  >;
+  const paymentIntentData: PaymentIntentData = {
+    metadata: {
+      booking_id: args.bookingId,
+      teacher_slug: args.teacher.slug,
+    },
+  };
+
+  // Route money to the teacher's Connect account when they're onboarded;
+  // platform keeps PLATFORM_FEE_PERCENT via application_fee_amount. If not
+  // onboarded, the charge stays on the platform balance and admin reconciles
+  // payouts manually (per Phase 5b decision).
+  if (teacherCanReceivePayouts(args.teacher)) {
+    paymentIntentData.transfer_data = {
+      destination: args.teacher.stripe_account_id!,
+    };
+    const fee = computeApplicationFeeCents(args.teacher.price_per_class);
+    if (fee > 0) paymentIntentData.application_fee_amount = fee;
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -219,12 +280,7 @@ async function createBookingCheckoutSession(args: {
       student_email: args.studentEmail,
       student_name: args.studentName,
     },
-    payment_intent_data: {
-      metadata: {
-        booking_id: args.bookingId,
-        teacher_slug: args.teacher.slug,
-      },
-    },
+    payment_intent_data: paymentIntentData,
   });
 
   if (!session.url) {

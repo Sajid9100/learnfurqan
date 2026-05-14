@@ -35,12 +35,24 @@ create table if not exists teachers (
   is_featured       boolean default false,
   slug              text unique not null,
   is_active         boolean default true,
+  email             text, -- Clerk login email; matched case-insensitively in lib/teacher-auth.ts
+  -- Stripe Connect Express (Phase 5b). Mirrored from `account.updated` webhook.
+  stripe_account_id        text,
+  stripe_charges_enabled   boolean not null default false,
+  stripe_payouts_enabled   boolean not null default false,
+  stripe_details_submitted boolean not null default false,
   class_duration_minutes int not null default 30
                       check (class_duration_minutes in (15, 30, 45, 60, 90)),
   created_at        timestamptz default now()
 );
 
 create index if not exists teachers_is_active_idx on teachers (is_active);
+create unique index if not exists teachers_email_lower_unique
+  on teachers (lower(email))
+  where email is not null;
+create unique index if not exists teachers_stripe_account_id_unique
+  on teachers (stripe_account_id)
+  where stripe_account_id is not null;
 create index if not exists teachers_is_featured_idx on teachers (is_featured);
 create index if not exists teachers_gender_idx on teachers (gender);
 
@@ -102,6 +114,7 @@ create table if not exists bookings (
   payment_status      text default 'free_trial'
                         check (payment_status in ('free_trial','pending','paid','refunded')),
   zoom_link           text default '',
+  lesson_notes        text not null default '',
   created_at          timestamptz default now()
 );
 
@@ -109,6 +122,86 @@ create index if not exists bookings_teacher_id_idx on bookings (teacher_id);
 create index if not exists bookings_student_email_idx on bookings (student_email);
 create index if not exists bookings_status_idx on bookings (status);
 create index if not exists bookings_created_at_idx on bookings (created_at desc);
+
+-- ============================================================
+-- REVIEWS — students rate a teacher after a completed booking
+-- ============================================================
+create table if not exists reviews (
+  id             uuid primary key default gen_random_uuid(),
+  booking_id     uuid not null unique references bookings(id) on delete cascade,
+  teacher_id     uuid not null references teachers(id) on delete cascade,
+  student_email  text not null,
+  student_name   text not null,
+  rating         int  not null check (rating between 1 and 5),
+  comment        text default '',
+  created_at     timestamptz default now()
+);
+
+create index if not exists reviews_teacher_id_created_idx
+  on reviews (teacher_id, created_at desc);
+create index if not exists reviews_booking_id_idx on reviews (booking_id);
+
+-- Recompute teachers.rating + teachers.review_count from current reviews.
+create or replace function recompute_teacher_rating(t uuid) returns void as $$
+begin
+  update teachers
+     set review_count = (select count(*) from reviews where teacher_id = t),
+         rating       = coalesce(
+           (select round(avg(rating)::numeric, 2) from reviews where teacher_id = t),
+           5.0
+         )
+   where id = t;
+end;
+$$ language plpgsql;
+
+create or replace function reviews_after_change() returns trigger as $$
+begin
+  if (TG_OP = 'DELETE') then
+    perform recompute_teacher_rating(OLD.teacher_id);
+    return OLD;
+  end if;
+  perform recompute_teacher_rating(NEW.teacher_id);
+  if (TG_OP = 'UPDATE' and OLD.teacher_id <> NEW.teacher_id) then
+    perform recompute_teacher_rating(OLD.teacher_id);
+  end if;
+  return NEW;
+end;
+$$ language plpgsql;
+
+drop trigger if exists reviews_after_change_trg on reviews;
+create trigger reviews_after_change_trg
+  after insert or update or delete on reviews
+  for each row execute function reviews_after_change();
+
+-- ============================================================
+-- MESSAGES — teacher ↔ student threads
+-- A "thread" is implicit: every (teacher_id, lower(student_email))
+-- pair forms one. No separate threads table.
+-- ============================================================
+create table if not exists messages (
+  id            uuid primary key default gen_random_uuid(),
+  teacher_id    uuid not null references teachers(id) on delete cascade,
+  student_email text not null,
+  student_name  text not null default '',
+  sender_role   text not null check (sender_role in ('teacher','student')),
+  body          text not null check (length(body) between 1 and 5000),
+  read_at       timestamptz,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists messages_thread_idx
+  on messages (teacher_id, lower(student_email), created_at desc);
+
+create index if not exists messages_student_lookup_idx
+  on messages (lower(student_email), created_at desc);
+
+create index if not exists messages_unread_for_teacher_idx
+  on messages (teacher_id)
+  where sender_role = 'student' and read_at is null;
+
+create index if not exists messages_unread_for_student_idx
+  on messages (lower(student_email))
+  where sender_role = 'teacher' and read_at is null;
 
 -- ============================================================
 -- SUBSCRIPTIONS
@@ -212,11 +305,13 @@ create table if not exists parent_preferences (
 -- ============================================================
 alter table teachers enable row level security;
 alter table bookings enable row level security;
+alter table reviews enable row level security;
 alter table subscriptions enable row level security;
 alter table teacher_applications enable row level security;
 alter table student_profiles enable row level security;
 alter table parent_children enable row level security;
 alter table parent_preferences enable row level security;
+alter table messages enable row level security;
 
 -- Teachers: anyone (anon + authenticated) may read active rows
 drop policy if exists "Public reads active teachers" on teachers;
@@ -224,6 +319,13 @@ create policy "Public reads active teachers"
   on teachers for select
   to anon, authenticated
   using (is_active = true);
+
+-- Reviews: anyone may read; writes flow through API routes (service role).
+drop policy if exists "Public reads reviews" on reviews;
+create policy "Public reads reviews"
+  on reviews for select
+  to anon, authenticated
+  using (true);
 
 -- Bookings / subscriptions / applications: no public policies.
 -- All writes flow through API routes using the service role key,
@@ -238,7 +340,7 @@ insert into teachers
    intro_video_url, available_slots, is_featured, slug)
 values
   ('Ustadh Ahmad Ali', 'male', 'Tajweed & Hifz', 'English, Arabic',
-   'Egypt', 'eg', 10, 15.00, 4.9, 134,
+   'Egypt', 'eg', 10, 15.00, 5.0, 0,
    'I have been teaching Quran for over 10 years with a focus on Tajweed and Hifz programs. I hold an Ijazah in Quran recitation and have helped over 200 students worldwide complete their memorization goals.',
    'Patient, structured, and encouraging. I create a personalized plan for each student.',
    'Ijazah in Tajweed, Al-Azhar University Certified',
@@ -247,7 +349,7 @@ values
    true, 'ustadh-ahmad-ali'),
 
   ('Sister Fatima Malik', 'female', 'Quran for Kids & Noorani Qaida', 'English, Urdu',
-   'Pakistan', 'pk', 6, 12.00, 4.8, 98,
+   'Pakistan', 'pk', 6, 12.00, 5.0, 0,
    'Specializing in teaching young children, I make Quran learning fun and engaging. My students love the interactive storytelling approach I use to teach Islamic values alongside recitation.',
    'Fun, engaging, and child-friendly. I use games and rewards to keep kids motivated.',
    'Diploma in Islamic Education, Certified Kids Quran Teacher',
@@ -256,7 +358,7 @@ values
    true, 'sister-fatima-malik'),
 
   ('Sheikh Omar Hassan', 'male', 'Arabic Language & Tafseer', 'English, Arabic, French',
-   'Jordan', 'jo', 14, 20.00, 5.0, 201,
+   'Jordan', 'jo', 14, 20.00, 5.0, 0,
    'With 14 years of experience teaching classical Arabic and Tafseer, I help students go beyond recitation to truly understand the meaning of the Quran. I have students from over 15 countries.',
    'Academic yet accessible. I connect Quranic meanings to real life situations.',
    'Masters in Islamic Studies, Jordan University. Ijazah in Tafseer.',
@@ -265,7 +367,7 @@ values
    true, 'sheikh-omar-hassan'),
 
   ('Ustadha Maryam Yusuf', 'female', 'Female Students Only — Quran & Tajweed', 'English, Malay',
-   'Malaysia', 'my', 7, 14.00, 4.9, 87,
+   'Malaysia', 'my', 7, 14.00, 5.0, 0,
    'I provide a safe and comfortable learning environment exclusively for female students and young girls. My approach is gentle, supportive, and rooted in traditional Islamic values.',
    'Warm, supportive, and confidence-building. Perfect for sisters new to Quran learning.',
    'Diploma in Quran Recitation, International Islamic University Malaysia',
@@ -274,7 +376,7 @@ values
    false, 'ustadha-maryam-yusuf'),
 
   ('Ustadh Bilal Qureshi', 'male', 'Hifz Program (Full Memorization)', 'English, Urdu',
-   'United Kingdom', 'gb', 9, 18.00, 4.8, 112,
+   'United Kingdom', 'gb', 9, 18.00, 5.0, 0,
    'I run a structured 3-year Hifz program online. My students follow a proven daily revision system that ensures long-term retention. I have helped 40+ students complete their Hifz online.',
    'Disciplined and systematic. I track every student''s daily progress closely.',
    'Hafiz ul Quran, Deobandi Ijazah',
@@ -283,7 +385,7 @@ values
    false, 'ustadh-bilal-qureshi'),
 
   ('Sister Aisha Rahman', 'female', 'Islamic Studies & Duas for Kids', 'English',
-   'United States', 'us', 5, 13.00, 4.7, 63,
+   'United States', 'us', 5, 13.00, 5.0, 0,
    'Born and raised in the US, I understand the challenges of raising Muslim kids in the West. My classes combine Quran recitation, daily duas, and fun Islamic stories tailored for children aged 4 to 12.',
    'Creative, storytelling-based, and highly interactive. Parents love seeing their kids excited about Islam.',
    'Bachelor of Islamic Studies, Islamic Online University',
@@ -292,7 +394,7 @@ values
    false, 'sister-aisha-rahman'),
 
   ('Ustadh Yusuf Al-Turki', 'male', 'Tajweed Mastery — Advanced Level', 'English, Arabic, Turkish',
-   'Turkey', 'tr', 12, 22.00, 4.9, 155,
+   'Turkey', 'tr', 12, 22.00, 5.0, 0,
    'I specialize in advanced Tajweed for students who already read Quran and want to perfect their recitation. My students have gone on to lead prayers at their local mosques worldwide.',
    'Precise, detail-oriented, and highly motivating. I push students to excellence.',
    'Ijazah with Sanad, Diyanet Certified Turkey',
@@ -301,7 +403,7 @@ values
    true, 'ustadh-yusuf-al-turki'),
 
   ('Ustadha Khadijah Osei', 'female', 'Quran for Reverts & Beginners', 'English',
-   'Ghana', 'gh', 4, 10.00, 4.8, 44,
+   'Ghana', 'gh', 4, 10.00, 5.0, 0,
    'Being a revert myself, I have a deep understanding of where new Muslims start from. I teach absolute beginners with zero prior knowledge — starting from Arabic letters all the way to fluent Quran recitation.',
    'Compassionate, zero-judgment, and beginner-friendly. Perfect for reverts and adult beginners.',
    'Certified Quran Teacher, Al-Maghrib Institute',

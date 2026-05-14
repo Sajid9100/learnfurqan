@@ -9,7 +9,11 @@ import {
 import {
   createServerSupabaseClient,
   isSupabaseAdminConfigured,
+  setBookingZoomLink,
 } from "@/lib/supabase";
+import { createScheduledMeeting, isZoomConfigured } from "@/lib/zoom";
+import { sendZoomLinkEmail } from "@/lib/email";
+import type { Booking } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,6 +63,9 @@ export async function POST(req: Request) {
           event.data.object as Stripe.Checkout.Session
         );
         break;
+      case "account.updated":
+        await handleAccountUpdated(event.data.object as Stripe.Account);
+        break;
       // Subscription events (customer.subscription.*, invoice.payment_*) are
       // ignored during the Preply pivot — bookings are charged per-class via
       // Stripe Checkout in `mode: "payment"`. Email templates and the
@@ -105,14 +112,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const admin = createServerSupabaseClient();
-  const { error } = await admin
+  const { data: updated, error } = await admin
     .from("bookings")
     .update({
       payment_status: "paid",
       status: "confirmed",
       stripe_session_id: session.id,
     })
-    .eq("id", bookingId);
+    .eq("id", bookingId)
+    .select("*")
+    .maybeSingle();
 
   if (error) {
     console.error("[stripe webhook] failed to mark booking paid", {
@@ -126,4 +135,100 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     booking_id: bookingId,
     session_id: session.id,
   });
+
+  if (updated) {
+    await deliverZoomForPaidBooking(updated as Booking);
+  }
+}
+
+// Auto-generate a Zoom meeting and email the link to the student. Best-effort:
+// any failure here is logged but doesn't reject the webhook (Stripe would
+// otherwise retry the whole event).
+async function deliverZoomForPaidBooking(booking: Booking) {
+  let zoomLink = booking.zoom_link;
+  if (!zoomLink && isZoomConfigured) {
+    try {
+      const duration = await lookupClassDuration(booking.teacher_id);
+      const meeting = await createScheduledMeeting({
+        topic: `${booking.teacher_name} × ${booking.student_name} — LearnFurqan`,
+        startTime: new Date(booking.selected_slot).toISOString(),
+        durationMinutes: duration,
+      });
+      zoomLink = meeting.joinUrl;
+      await setBookingZoomLink(booking.id, zoomLink);
+    } catch (err) {
+      console.error("[stripe webhook] zoom auto-gen failed", {
+        booking_id: booking.id,
+        err,
+      });
+    }
+  }
+
+  if (!zoomLink) return;
+  try {
+    await sendZoomLinkEmail({
+      studentName: booking.student_name,
+      studentEmail: booking.student_email,
+      teacherName: booking.teacher_name,
+      selectedSlot: booking.selected_slot,
+      zoomLink,
+    });
+  } catch (err) {
+    console.error("[stripe webhook] zoom email send failed", {
+      booking_id: booking.id,
+      err,
+    });
+  }
+}
+
+// Sync Connect Express status onto the matching teacher row. Fired when
+// the teacher completes onboarding, links a bank account, or Stripe finishes
+// reviewing them. We match on stripe_account_id; if no row matches the event
+// is for someone else (or a stale account) — log and ignore.
+async function handleAccountUpdated(account: Stripe.Account) {
+  if (!isSupabaseAdminConfigured) return;
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("teachers")
+    .update({
+      stripe_charges_enabled: Boolean(account.charges_enabled),
+      stripe_payouts_enabled: Boolean(account.payouts_enabled),
+      stripe_details_submitted: Boolean(account.details_submitted),
+    })
+    .eq("stripe_account_id", account.id)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    console.error("[stripe webhook] account.updated sync failed", {
+      account: account.id,
+      error,
+    });
+    return;
+  }
+  if (!data) {
+    console.log("[stripe webhook] account.updated for unknown teacher", {
+      account: account.id,
+    });
+    return;
+  }
+  console.log("[stripe webhook] teacher Connect status synced", {
+    teacher_id: data.id,
+    account: account.id,
+    charges_enabled: account.charges_enabled,
+    payouts_enabled: account.payouts_enabled,
+  });
+}
+
+async function lookupClassDuration(
+  teacherId: string | null
+): Promise<number> {
+  if (!teacherId) return 30;
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("teachers")
+    .select("class_duration_minutes")
+    .eq("id", teacherId)
+    .maybeSingle();
+  if (error || !data) return 30;
+  return (data as { class_duration_minutes: number }).class_duration_minutes ?? 30;
 }

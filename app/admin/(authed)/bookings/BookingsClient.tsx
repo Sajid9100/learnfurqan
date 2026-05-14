@@ -188,7 +188,7 @@ export function BookingsClient() {
                           color="accent"
                           icon={<Video className="h-3.5 w-3.5" />}
                         >
-                          {b.zoom_link ? "Update Zoom" : "Add Zoom Link"}
+                          {b.zoom_link ? "Update Zoom" : "Override Zoom Link"}
                         </ActionBtn>
                         {b.status !== "completed" && (
                           <ActionBtn
@@ -299,7 +299,7 @@ function ZoomModal({
   if (!booking) return null;
 
   return (
-    <Modal open={!!booking} onClose={onClose} title="Add Zoom Link">
+    <Modal open={!!booking} onClose={onClose} title="Override Zoom Link">
       <div className="space-y-4">
         <div className="rounded-xl bg-muted/40 p-3 text-sm">
           <div>
@@ -331,7 +331,9 @@ function ZoomModal({
             className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
           />
           <p className="mt-2 text-xs text-muted-foreground">
-            The student will receive an email with this link automatically.
+            Bookings auto-generate a Zoom link via the LearnFurqan host
+            account. Use this only to override the auto-generated link. The
+            student will receive an email with the new link.
           </p>
         </div>
         <div className="flex justify-end gap-2 pt-2">

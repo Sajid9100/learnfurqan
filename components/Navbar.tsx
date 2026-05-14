@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LayoutDashboard, Users } from "lucide-react";
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+} from "lucide-react";
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Logo } from "./ui/Logo";
 import { Button } from "./ui/button";
@@ -144,11 +150,39 @@ export function Navbar() {
   );
 }
 
+function useIsTeacher(): boolean {
+  const [isTeacher, setIsTeacher] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/teacher/me")
+      .then((r) => (r.ok ? r.json() : { teacher: null }))
+      .then((data) => {
+        if (!cancelled) setIsTeacher(Boolean(data?.teacher));
+      })
+      .catch(() => {
+        if (!cancelled) setIsTeacher(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return isTeacher;
+}
+
 function DesktopAuthedActions() {
   const { user } = useUser();
+  const isTeacher = useIsTeacher();
   const greeting = user?.firstName || user?.username || "Account";
   return (
     <>
+      {isTeacher && (
+        <Link href="/teacher" className="contents">
+          <Button variant="ghost" size="md">
+            <GraduationCap className="h-4 w-4" />
+            Teacher
+          </Button>
+        </Link>
+      )}
       <Link href="/dashboard" className="contents">
         <Button variant="ghost" size="md">
           <LayoutDashboard className="h-4 w-4" />
@@ -171,12 +205,25 @@ function DesktopAuthedActions() {
 
 function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
   const { user } = useUser();
+  const isTeacher = useIsTeacher();
   const greeting = user?.firstName || user?.username || "your account";
   return (
     <div className="mt-3 flex flex-col gap-2 px-1">
       <div className="px-1 text-sm text-muted-foreground">Hi, {greeting}</div>
+      {isTeacher && (
+        <Link href="/teacher" onClick={onNavigate} className="contents">
+          <Button variant="primary" size="md" className="w-full">
+            <GraduationCap className="h-4 w-4" />
+            Teacher Dashboard
+          </Button>
+        </Link>
+      )}
       <Link href="/dashboard" onClick={onNavigate} className="contents">
-        <Button variant="primary" size="md" className="w-full">
+        <Button
+          variant={isTeacher ? "outline" : "primary"}
+          size="md"
+          className="w-full"
+        >
           <LayoutDashboard className="h-4 w-4" />
           Student Dashboard
         </Button>

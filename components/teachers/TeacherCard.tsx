@@ -63,11 +63,19 @@ export function TeacherCard({
           <Clock className="h-3 w-3" />
           {teacher.experience_years} years
         </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent-700">
-          <Star className="h-3 w-3 fill-current" />
-          {teacher.rating.toFixed(1)}
-          <span className="font-normal text-accent-700/70">({teacher.review_count})</span>
-        </span>
+        {teacher.review_count > 0 ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent-700">
+            <Star className="h-3 w-3 fill-current" />
+            {teacher.rating.toFixed(1)}
+            <span className="font-normal text-accent-700/70">
+              ({teacher.review_count})
+            </span>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            New teacher
+          </span>
+        )}
       </div>
 
       <div className="mt-5 flex items-baseline gap-1 border-t border-border/70 pt-4">

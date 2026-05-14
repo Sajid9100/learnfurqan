@@ -7,6 +7,8 @@ import {
   getBookingsForEmails,
   summarizeBookings,
 } from "@/lib/parent-data";
+import { getReviewableBookings } from "@/lib/supabase";
+import { ReviewableBookings } from "@/components/parent/ReviewableBookings";
 import { CLASSES_GOAL, type Booking, type ParentChild } from "@/lib/types";
 import { formatBookingSlot } from "@/lib/utils";
 
@@ -18,7 +20,13 @@ export default async function ParentHomePage() {
   const children = await getParentChildren(parent.email);
 
   const emails = children.map((c) => c.linked_booking_email || parent.email);
-  const bookingsByEmail = await getBookingsForEmails(emails);
+  const [bookingsByEmail, reviewable] = await Promise.all([
+    getBookingsForEmails(emails),
+    getReviewableBookings([
+      parent.email,
+      ...children.map((c) => c.linked_booking_email).filter(Boolean),
+    ]),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -39,6 +47,8 @@ export default async function ParentHomePage() {
           Add Child
         </Link>
       </div>
+
+      <ReviewableBookings bookings={reviewable} />
 
       {children.length === 0 ? (
         <EmptyState />

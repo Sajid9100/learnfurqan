@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
+  CalendarClock,
   Calendar,
   CheckCircle2,
   GraduationCap,
@@ -16,6 +17,7 @@ import {
   isSupabaseAdminConfigured,
 } from "@/lib/supabase";
 import { summarizeBookings } from "@/lib/parent-data";
+import { UpcomingBookings } from "@/components/parent/UpcomingBookings";
 import {
   CLASSES_GOAL,
   type Booking,
@@ -100,7 +102,14 @@ export default async function ChildDetailPage({
   const onTrack = summary.upcoming > 0 || summary.completed > 0;
   const earned = earnedAchievements(bookings);
   const recent = bookings.slice(0, 10);
-  const notes = bookings.find((b) => b.message)?.message?.trim() ?? "";
+  const notedClasses = bookings
+    .filter((b) => b.status === "completed" && b.lesson_notes?.trim())
+    .sort(
+      (a, b) =>
+        new Date(b.selected_slot).getTime() -
+        new Date(a.selected_slot).getTime()
+    )
+    .slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -165,13 +174,15 @@ export default async function ChildDetailPage({
                     {summary.next ? formatBookingSlot(summary.next.selected_slot) : "Not scheduled"}
                   </span>
                 </div>
-                <a
-                  href={`mailto:teacher@learnfurqan.com?subject=About ${encodeURIComponent(child.child_name)}`}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5"
-                >
-                  <Mail className="h-4 w-4" />
-                  Message Teacher
-                </a>
+                {summary.next?.teacher_slug ? (
+                  <Link
+                    href={`/parent/messages/${summary.next.teacher_slug}`}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Message Teacher
+                  </Link>
+                ) : null}
               </div>
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">
@@ -225,6 +236,15 @@ export default async function ChildDetailPage({
           </Card>
 
           <Card>
+            <SectionTitle icon={<CalendarClock className="h-4 w-4" />}>
+              Upcoming classes
+            </SectionTitle>
+            <div className="mt-3">
+              <UpcomingBookings bookings={bookings} />
+            </div>
+          </Card>
+
+          <Card>
             <SectionTitle icon={<Calendar className="h-4 w-4" />}>
               Attendance — last {recent.length || 0} classes
             </SectionTitle>
@@ -264,16 +284,32 @@ export default async function ChildDetailPage({
 
           <Card>
             <SectionTitle icon={<BookOpen className="h-4 w-4" />}>
-              Homework & notes
+              Teacher's notes
             </SectionTitle>
-            {notes ? (
-              <p className="mt-3 whitespace-pre-line text-sm text-foreground">
-                {notes}
+            {notedClasses.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No notes yet. Teachers can post notes after each completed
+                class.
               </p>
             ) : (
-              <p className="mt-3 text-sm text-muted-foreground">
-                No homework assigned yet.
-              </p>
+              <ul className="mt-3 space-y-4">
+                {notedClasses.map((b) => (
+                  <li
+                    key={b.id}
+                    className="rounded-xl border border-border bg-muted/20 px-4 py-3"
+                  >
+                    <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        {b.teacher_name}
+                      </span>
+                      <span>{formatDate(b.selected_slot)}</span>
+                    </div>
+                    <p className="whitespace-pre-line text-sm text-foreground/90">
+                      {b.lesson_notes}
+                    </p>
+                  </li>
+                ))}
+              </ul>
             )}
           </Card>
 

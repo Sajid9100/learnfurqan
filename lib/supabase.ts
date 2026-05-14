@@ -1,7 +1,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { TEACHERS as SEED_TEACHERS } from "./teachers-data";
 import type {
+  Booking,
   BookingInsert,
+  Review,
+  ReviewableBooking,
   Teacher,
   TeacherApplicationInsert,
   TeacherAvailabilityException,
@@ -101,6 +104,21 @@ export async function createBooking(
   return { id: row.id as string };
 }
 
+export async function setBookingZoomLink(
+  bookingId: string,
+  zoomLink: string
+): Promise<void> {
+  if (!isSupabaseAdminConfigured) return;
+  const admin = createServerSupabaseClient();
+  const { error } = await admin
+    .from("bookings")
+    .update({ zoom_link: zoomLink })
+    .eq("id", bookingId);
+  if (error) {
+    console.warn("[supabase] setBookingZoomLink failed:", error.message);
+  }
+}
+
 // Returns true if the student already has a non-cancelled booking with this
 // teacher — i.e. their free first class has been used and the next one needs
 // to be paid for.
@@ -159,6 +177,23 @@ export async function getAvailabilityExceptions(
   return (data ?? []) as TeacherAvailabilityException[];
 }
 
+export async function getBookingsForTeacher(
+  teacherId: string
+): Promise<Booking[]> {
+  if (!isSupabaseAdminConfigured) return [];
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("bookings")
+    .select("*")
+    .eq("teacher_id", teacherId)
+    .order("selected_slot", { ascending: false });
+  if (error) {
+    console.warn("[supabase] getBookingsForTeacher failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as Booking[];
+}
+
 // Returns occupied slot ranges (ISO start/end) for a teacher within [from, to].
 // Used to filter out already-booked times when computing availability.
 export async function getBookedRangesForTeacher(
@@ -194,6 +229,131 @@ function parseSlotStart(raw: string): Date | null {
   const d = new Date(raw);
   if (Number.isFinite(d.getTime())) return d;
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+export async function getReviewsByTeacherId(
+  teacherId: string,
+  limit = 50
+): Promise<Review[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("teacher_id", teacherId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.warn("[supabase] getReviewsByTeacherId failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as Review[];
+}
+
+export async function getReviewsByTeacherSlug(
+  slug: string,
+  limit = 50
+): Promise<Review[]> {
+  const teacher = await getTeacherBySlug(slug);
+  if (!teacher) return [];
+  return getReviewsByTeacherId(teacher.id, limit);
+}
+
+export async function getBookingForReview(
+  bookingId: string
+): Promise<Booking | null> {
+  if (!isSupabaseAdminConfigured) return null;
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (error) {
+    console.warn("[supabase] getBookingForReview failed:", error.message);
+    return null;
+  }
+  return (data as Booking) ?? null;
+}
+
+export async function getReviewByBookingId(
+  bookingId: string
+): Promise<Review | null> {
+  if (!isSupabaseAdminConfigured) return null;
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("reviews")
+    .select("*")
+    .eq("booking_id", bookingId)
+    .maybeSingle();
+  if (error) {
+    console.warn("[supabase] getReviewByBookingId failed:", error.message);
+    return null;
+  }
+  return (data as Review) ?? null;
+}
+
+export async function createReview(input: {
+  booking_id: string;
+  teacher_id: string;
+  student_email: string;
+  student_name: string;
+  rating: number;
+  comment: string;
+}): Promise<Review> {
+  if (!isSupabaseAdminConfigured) {
+    throw new Error("Supabase service role is not configured.");
+  }
+  const admin = createServerSupabaseClient();
+  const { data, error } = await admin
+    .from("reviews")
+    .insert(input)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as Review;
+}
+
+// Returns completed bookings for the given emails that don't yet have a review.
+// Used by the parent dashboard to surface "leave a review" prompts.
+export async function getReviewableBookings(
+  emails: string[]
+): Promise<ReviewableBooking[]> {
+  const unique = Array.from(
+    new Set(emails.map((e) => e.trim().toLowerCase()).filter(Boolean))
+  );
+  if (unique.length === 0 || !isSupabaseAdminConfigured) return [];
+
+  const admin = createServerSupabaseClient();
+  const { data: bookings, error } = await admin
+    .from("bookings")
+    .select(
+      "id, teacher_id, teacher_name, teacher_slug, student_email, student_name, selected_slot"
+    )
+    .in("student_email", unique)
+    .eq("status", "completed")
+    .order("selected_slot", { ascending: false });
+  if (error) {
+    console.warn("[supabase] getReviewableBookings failed:", error.message);
+    return [];
+  }
+  const rows = (bookings ?? []) as ReviewableBooking[];
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((b) => b.id);
+  const { data: existing, error: revErr } = await admin
+    .from("reviews")
+    .select("booking_id")
+    .in("booking_id", ids);
+  if (revErr) {
+    console.warn("[supabase] reviewable existing-reviews lookup failed:", revErr.message);
+    return rows;
+  }
+  const reviewed = new Set((existing ?? []).map((r) => (r as { booking_id: string }).booking_id));
+  return rows.filter((b) => !reviewed.has(b.id));
 }
 
 export async function createTeacherApplication(

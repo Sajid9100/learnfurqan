@@ -18,6 +18,11 @@ export type Teacher = {
   is_featured: boolean;
   slug: string;
   class_duration_minutes?: number;
+  email?: string | null;
+  stripe_account_id?: string | null;
+  stripe_charges_enabled?: boolean;
+  stripe_payouts_enabled?: boolean;
+  stripe_details_submitted?: boolean;
 };
 
 // 0 = Sunday … 6 = Saturday (matches JavaScript Date.getDay()).
@@ -75,17 +80,70 @@ export type Booking = {
   stripe_session_id: string;
   payment_status: "free_trial" | "pending" | "paid" | "refunded";
   zoom_link: string;
+  lesson_notes: string;
   created_at: string;
 };
 
 export type BookingInsert = Omit<
   Booking,
-  "id" | "created_at" | "status" | "stripe_session_id" | "payment_status" | "zoom_link"
+  | "id"
+  | "created_at"
+  | "status"
+  | "stripe_session_id"
+  | "payment_status"
+  | "zoom_link"
+  | "lesson_notes"
 > & {
   status?: Booking["status"];
   stripe_session_id?: string;
   payment_status?: Booking["payment_status"];
   zoom_link?: string;
+  lesson_notes?: string;
+};
+
+export type Review = {
+  id: string;
+  booking_id: string;
+  teacher_id: string;
+  student_email: string;
+  student_name: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  created_at: string;
+};
+
+export type ReviewableBooking = {
+  id: string;
+  teacher_id: string | null;
+  teacher_name: string;
+  teacher_slug: string;
+  student_email: string;
+  student_name: string;
+  selected_slot: string;
+};
+
+export type MessageSender = "teacher" | "student";
+
+export type Message = {
+  id: string;
+  teacher_id: string;
+  student_email: string;
+  student_name: string;
+  sender_role: MessageSender;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+// One row per (teacher, student-email) pair — what's rendered in the inbox list.
+export type MessageThreadSummary = {
+  teacher_id: string;
+  teacher_name: string;
+  teacher_slug: string;
+  student_email: string;
+  student_name: string;
+  last_message: Message;
+  unread_count: number;
 };
 
 export type SubscriptionPlan = "basic" | "premium";

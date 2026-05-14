@@ -98,6 +98,7 @@ export async function POST(req: Request) {
       body.class_duration_minutes !== undefined
         ? Number(body.class_duration_minutes)
         : 30,
+    email: normalizeEmail(body.email),
   };
 
   const admin = createServerSupabaseClient();
@@ -110,4 +111,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   return NextResponse.json({ teacher: data }, { status: 201 });
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeEmail(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim().toLowerCase();
+  if (!v) return null;
+  if (!EMAIL_RE.test(v)) return null;
+  return v;
 }

@@ -30,6 +30,7 @@ const EMPTY_FORM: TeacherFormState = {
   slug: "",
   is_active: true,
   class_duration_minutes: 30,
+  email: "",
 };
 
 type TeacherFormState = {
@@ -52,6 +53,7 @@ type TeacherFormState = {
   slug: string;
   is_active: boolean;
   class_duration_minutes: number;
+  email: string;
 };
 
 export function TeachersClient() {
@@ -309,6 +311,7 @@ function rowToForm(t: TeacherRow): TeacherFormState {
     slug: t.slug,
     is_active: t.is_active ?? true,
     class_duration_minutes: t.class_duration_minutes ?? 30,
+    email: t.email ?? "",
   };
 }
 
@@ -336,7 +339,8 @@ function formToPayload(f: TeacherFormState): Partial<Teacher> & { is_active: boo
     slug: f.slug.trim(),
     is_active: f.is_active,
     class_duration_minutes: Number(f.class_duration_minutes) || 30,
-  };
+    email: f.email.trim() || null,
+  } as Partial<Teacher> & { is_active: boolean };
 }
 
 function TeacherFormModal({
@@ -517,6 +521,15 @@ function TeacherFormModal({
               value={form.intro_video_url}
               onChange={(e) => set("intro_video_url", e.target.value)}
               placeholder="https://..."
+            />
+          </Field>
+          <Field label="Login email (Clerk)">
+            <input
+              type="email"
+              className={inputCls}
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              placeholder="teacher@example.com"
             />
           </Field>
         </div>
