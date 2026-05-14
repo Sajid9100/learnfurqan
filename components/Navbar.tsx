@@ -67,6 +67,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <DesktopAuthedActions />
           <SignedOut>
             <Link href="/sign-in" className="contents">
               <Button variant="ghost" size="md">
@@ -79,9 +80,6 @@ export function Navbar() {
               </Button>
             </Link>
           </SignedOut>
-          <SignedIn>
-            <DesktopAuthedActions />
-          </SignedIn>
         </div>
 
         <button
@@ -116,6 +114,7 @@ export function Navbar() {
                 </Link>
               ))}
 
+              <MobileAuthedActions onNavigate={() => setMobileOpen(false)} />
               <SignedOut>
                 <div className="mt-3 grid grid-cols-2 gap-2 px-1">
                   <Link
@@ -138,10 +137,6 @@ export function Navbar() {
                   </Link>
                 </div>
               </SignedOut>
-
-              <SignedIn>
-                <MobileAuthedActions onNavigate={() => setMobileOpen(false)} />
-              </SignedIn>
             </div>
           </motion.div>
         )}
@@ -170,9 +165,15 @@ function useIsTeacher(): boolean {
 }
 
 function DesktopAuthedActions() {
-  const { user } = useUser();
+  const { isSignedIn, user } = useUser();
   const isTeacher = useIsTeacher();
   const greeting = user?.firstName || user?.username || "Account";
+  const studentHref = isSignedIn
+    ? "/dashboard"
+    : "/sign-in?redirect_url=/dashboard";
+  const parentHref = isSignedIn
+    ? "/parent"
+    : "/sign-in?redirect_url=/parent";
   return (
     <>
       {isTeacher && (
@@ -183,33 +184,43 @@ function DesktopAuthedActions() {
           </Button>
         </Link>
       )}
-      <Link href="/dashboard" className="contents">
+      <Link href={studentHref} className="contents">
         <Button variant="ghost" size="md">
           <LayoutDashboard className="h-4 w-4" />
           Student
         </Button>
       </Link>
-      <Link href="/parent" className="contents">
+      <Link href={parentHref} className="contents">
         <Button variant="ghost" size="md">
           <Users className="h-4 w-4" />
           Parent
         </Button>
       </Link>
-      <span className="hidden text-sm font-medium text-muted-foreground xl:inline">
-        Hi, {greeting}
-      </span>
-      <UserButton afterSignOutUrl="/" />
+      <SignedIn>
+        <span className="hidden text-sm font-medium text-muted-foreground xl:inline">
+          Hi, {greeting}
+        </span>
+        <UserButton afterSignOutUrl="/" />
+      </SignedIn>
     </>
   );
 }
 
 function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
-  const { user } = useUser();
+  const { isSignedIn, user } = useUser();
   const isTeacher = useIsTeacher();
   const greeting = user?.firstName || user?.username || "your account";
+  const studentHref = isSignedIn
+    ? "/dashboard"
+    : "/sign-in?redirect_url=/dashboard";
+  const parentHref = isSignedIn
+    ? "/parent"
+    : "/sign-in?redirect_url=/parent";
   return (
     <div className="mt-3 flex flex-col gap-2 px-1">
-      <div className="px-1 text-sm text-muted-foreground">Hi, {greeting}</div>
+      <SignedIn>
+        <div className="px-1 text-sm text-muted-foreground">Hi, {greeting}</div>
+      </SignedIn>
       {isTeacher && (
         <Link href="/teacher" onClick={onNavigate} className="contents">
           <Button variant="primary" size="md" className="w-full">
@@ -218,7 +229,7 @@ function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
           </Button>
         </Link>
       )}
-      <Link href="/dashboard" onClick={onNavigate} className="contents">
+      <Link href={studentHref} onClick={onNavigate} className="contents">
         <Button
           variant={isTeacher ? "outline" : "primary"}
           size="md"
@@ -228,16 +239,18 @@ function MobileAuthedActions({ onNavigate }: { onNavigate: () => void }) {
           Student Dashboard
         </Button>
       </Link>
-      <Link href="/parent" onClick={onNavigate} className="contents">
+      <Link href={parentHref} onClick={onNavigate} className="contents">
         <Button variant="outline" size="md" className="w-full">
           <Users className="h-4 w-4" />
           Parent Dashboard
         </Button>
       </Link>
-      <div className="flex items-center justify-between rounded-xl border border-border bg-white px-3 py-2">
-        <span className="text-sm text-muted-foreground">Account</span>
-        <UserButton afterSignOutUrl="/" />
-      </div>
+      <SignedIn>
+        <div className="flex items-center justify-between rounded-xl border border-border bg-white px-3 py-2">
+          <span className="text-sm text-muted-foreground">Account</span>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+      </SignedIn>
     </div>
   );
 }
