@@ -14,6 +14,29 @@ import {
 
 export const runtime = "nodejs";
 
+const TURNSTILE_VERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return false;
+  try {
+    const form = new URLSearchParams();
+    form.set("secret", secret);
+    form.set("response", token);
+    if (ip) form.set("remoteip", ip);
+    const res = await fetch(TURNSTILE_VERIFY_URL, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { success?: boolean };
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   const ip = clientIp(req);
 
@@ -28,11 +51,21 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { email?: string; password?: string };
+  let body: { email?: string; password?: string; captchaToken?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const captchaToken = (body.captchaToken ?? "").toString();
+  if (!captchaToken) {
+    return NextResponse.json({ error: "CAPTCHA failed" }, { status: 400 });
+  }
+  const captchaOk = await verifyTurnstile(captchaToken, ip);
+  if (!captchaOk) {
+    await recordAdminLoginAttempt(ip, false);
+    return NextResponse.json({ error: "CAPTCHA failed" }, { status: 400 });
   }
 
   const email = (body.email ?? "").toString();

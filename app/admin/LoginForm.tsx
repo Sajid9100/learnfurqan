@@ -1,8 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Button } from "@/components/ui/button";
+
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function LoginForm() {
   const router = useRouter();
@@ -10,6 +13,8 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,17 +24,21 @@ export function LoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, captchaToken }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data?.error || "Login failed");
+        setCaptchaToken(null);
+        turnstileRef.current?.reset();
         return;
       }
       router.replace("/admin/dashboard");
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -76,6 +85,23 @@ export function LoginForm() {
         />
       </div>
 
+      {SITE_KEY ? (
+        <div className="flex justify-center">
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={SITE_KEY}
+            options={{ theme: "light" }}
+            onSuccess={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+          />
+        </div>
+      ) : (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          Turnstile is not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY.
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
@@ -87,7 +113,12 @@ export function LoginForm() {
         variant="primary"
         size="lg"
         className="w-full"
-        disabled={loading || email.length === 0 || password.length === 0}
+        disabled={
+          loading ||
+          email.length === 0 ||
+          password.length === 0 ||
+          (SITE_KEY ? !captchaToken : false)
+        }
       >
         {loading ? "Logging in…" : "Login"}
       </Button>
