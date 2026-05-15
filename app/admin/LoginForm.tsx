@@ -19,12 +19,17 @@ export function LoginForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const token = captchaToken ?? turnstileRef.current?.getResponse() ?? null;
+    if (SITE_KEY && !token) {
+      setError("Please complete the CAPTCHA.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ email, password, captchaToken: token }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -91,9 +96,18 @@ export function LoginForm() {
             ref={turnstileRef}
             siteKey={SITE_KEY}
             options={{ theme: "light" }}
-            onSuccess={(token) => setCaptchaToken(token)}
-            onExpire={() => setCaptchaToken(null)}
-            onError={() => setCaptchaToken(null)}
+            onSuccess={(token) => {
+              console.log("[turnstile] onSuccess fired, token_len=", token.length);
+              setCaptchaToken(token);
+            }}
+            onExpire={() => {
+              console.log("[turnstile] onExpire");
+              setCaptchaToken(null);
+            }}
+            onError={(err) => {
+              console.log("[turnstile] onError", err);
+              setCaptchaToken(null);
+            }}
           />
         </div>
       ) : (
@@ -113,12 +127,7 @@ export function LoginForm() {
         variant="primary"
         size="lg"
         className="w-full"
-        disabled={
-          loading ||
-          email.length === 0 ||
-          password.length === 0 ||
-          (SITE_KEY ? !captchaToken : false)
-        }
+        disabled={loading || (SITE_KEY ? !captchaToken : false)}
       >
         {loading ? "Logging in…" : "Login"}
       </Button>
