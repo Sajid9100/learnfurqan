@@ -19,7 +19,13 @@ const TURNSTILE_VERIFY_URL =
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  console.log("[turnstile-debug] secret_present=", Boolean(secret), "secret_len=", secret?.length ?? 0);
+  console.log(
+    "[turnstile-debug] secret_present=", Boolean(secret),
+    "secret_len=", secret?.length ?? 0,
+    "secret_prefix=", secret?.slice(0, 4),
+    "secret_tail=", secret?.slice(-4),
+    "looks_like_turnstile=", Boolean(secret && /^0x4A/.test(secret) && secret.length >= 30 && secret.length <= 50)
+  );
   console.log("[turnstile-debug] token_present=", Boolean(token), "token_len=", token?.length ?? 0, "token_prefix=", token?.slice(0, 12));
   console.log("[turnstile-debug] verify_url=", TURNSTILE_VERIFY_URL, "ip=", ip);
   if (!secret) {
