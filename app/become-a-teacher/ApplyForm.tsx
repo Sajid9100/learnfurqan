@@ -240,14 +240,14 @@ function AvailabilityGrid({
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="-mx-6 overflow-x-auto border-y border-border bg-white [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-2 sm:-mx-8">
         {DAYS.map(({ key, label }, idx) => {
           const day = schedule[key];
           const enabled = Boolean(day);
           return (
             <div
               key={key}
-              className={`flex w-max min-w-full items-center gap-x-4 px-4 py-3 ${
+              className={`flex w-max min-w-full items-center gap-x-4 px-6 py-3 sm:px-8 ${
                 idx > 0 ? "border-t border-border" : ""
               }`}
             >
