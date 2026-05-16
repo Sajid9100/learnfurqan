@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const COUNTRIES = [
@@ -42,11 +42,106 @@ const SUBJECTS = [
 
 const LANGUAGES = ["English", "Arabic", "Urdu", "Turkish", "French", "Malay"];
 
-const AVAILABILITY = [
-  "Weekday mornings",
-  "Weekday evenings",
-  "Weekends",
+// Suggested languages by country. First entry is the primary (auto-checked).
+const COUNTRY_LANGUAGES: Record<string, string[]> = {
+  Pakistan: ["Urdu", "English"],
+  India: ["Urdu", "English"],
+  Bangladesh: ["Urdu", "English"],
+  Egypt: ["Arabic", "English"],
+  "Saudi Arabia": ["Arabic", "English"],
+  "United Arab Emirates": ["Arabic", "English"],
+  Jordan: ["Arabic", "English"],
+  Palestine: ["Arabic", "English"],
+  Yemen: ["Arabic", "English"],
+  Sudan: ["Arabic", "English"],
+  Morocco: ["Arabic", "French"],
+  Algeria: ["Arabic", "French"],
+  Tunisia: ["Arabic", "French"],
+  Turkey: ["Turkish", "English"],
+  Malaysia: ["Malay", "English"],
+  Indonesia: ["Malay", "English"],
+  "United Kingdom": ["English"],
+  "United States": ["English"],
+  Canada: ["English"],
+  Australia: ["English"],
+  France: ["French", "English"],
+  Germany: ["English"],
+  Nigeria: ["English"],
+  "South Africa": ["English"],
+};
+
+const TIMEZONES = [
+  { value: "UTC", label: "UTC" },
+  { value: "GMT+0", label: "GMT+0 (UK)" },
+  { value: "GMT+2", label: "GMT+2 (Egypt)" },
+  { value: "GMT+3", label: "GMT+3 (Saudi Arabia / Turkey)" },
+  { value: "GMT+5", label: "GMT+5 (Pakistan)" },
+  { value: "GMT+8", label: "GMT+8 (Malaysia)" },
+  { value: "GMT+10", label: "GMT+10 (Australia EST)" },
+  { value: "GMT-5", label: "GMT-5 (USA EST)" },
+  { value: "GMT-8", label: "GMT-8 (USA PST)" },
 ];
+
+const COUNTRY_TIMEZONE: Record<string, string> = {
+  Pakistan: "GMT+5",
+  India: "GMT+5",
+  Bangladesh: "GMT+5",
+  Egypt: "GMT+2",
+  "Saudi Arabia": "GMT+3",
+  "United Arab Emirates": "GMT+3",
+  Jordan: "GMT+3",
+  Palestine: "GMT+3",
+  Yemen: "GMT+3",
+  Sudan: "GMT+2",
+  Turkey: "GMT+3",
+  Malaysia: "GMT+8",
+  Indonesia: "GMT+8",
+  "United Kingdom": "GMT+0",
+  "United States": "GMT-5",
+  Canada: "GMT-5",
+  Australia: "GMT+10",
+  France: "GMT+0",
+  Germany: "GMT+0",
+  Morocco: "GMT+0",
+  Algeria: "GMT+0",
+  Tunisia: "GMT+0",
+};
+
+const DAYS: { key: DayKey; label: string }[] = [
+  { key: "mon", label: "Mon" },
+  { key: "tue", label: "Tue" },
+  { key: "wed", label: "Wed" },
+  { key: "thu", label: "Thu" },
+  { key: "fri", label: "Fri" },
+  { key: "sat", label: "Sat" },
+  { key: "sun", label: "Sun" },
+];
+
+const TIME_OPTIONS = (() => {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 30]) {
+      out.push(
+        `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`
+      );
+    }
+  }
+  return out;
+})();
+
+type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+type DaySchedule = { from: string; to: string } | null;
+type Schedule = Record<DayKey, DaySchedule>;
+
+const DEFAULT_SCHEDULE: Schedule = {
+  mon: { from: "09:00", to: "17:00" },
+  tue: { from: "09:00", to: "17:00" },
+  wed: { from: "09:00", to: "17:00" },
+  thu: { from: "09:00", to: "17:00" },
+  fri: { from: "09:00", to: "17:00" },
+  sat: null,
+  sun: null,
+};
 
 const inputCls =
   "w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30";
@@ -58,11 +153,13 @@ function CheckboxGroup({
   values,
   onChange,
   name,
+  highlight,
 }: {
   options: string[];
   values: string[];
   onChange: (next: string[]) => void;
   name: string;
+  highlight?: string[];
 }) {
   function toggle(opt: string) {
     if (values.includes(opt)) {
@@ -75,12 +172,15 @@ function CheckboxGroup({
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {options.map((opt) => {
         const checked = values.includes(opt);
+        const suggested = highlight?.includes(opt);
         return (
           <label
             key={opt}
             className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition ${
               checked
                 ? "border-primary bg-primary/5 text-primary"
+                : suggested
+                ? "border-primary/40 bg-white text-foreground"
                 : "border-border bg-white text-foreground hover:border-primary/40"
             }`}
           >
@@ -92,10 +192,126 @@ function CheckboxGroup({
               onChange={() => toggle(opt)}
               className="h-4 w-4 accent-primary"
             />
-            <span>{opt}</span>
+            <span className="flex-1">{opt}</span>
+            {suggested && !checked && (
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">
+                Suggested
+              </span>
+            )}
           </label>
         );
       })}
+    </div>
+  );
+}
+
+function AvailabilityGrid({
+  timezone,
+  onTimezoneChange,
+  schedule,
+  onScheduleChange,
+}: {
+  timezone: string;
+  onTimezoneChange: (tz: string) => void;
+  schedule: Schedule;
+  onScheduleChange: (next: Schedule) => void;
+}) {
+  function setDay(key: DayKey, value: DaySchedule) {
+    onScheduleChange({ ...schedule, [key]: value });
+  }
+  function toggleDay(key: DayKey) {
+    if (schedule[key]) {
+      setDay(key, null);
+    } else {
+      setDay(key, { from: "09:00", to: "17:00" });
+    }
+  }
+  function setTime(key: DayKey, field: "from" | "to", value: string) {
+    const current = schedule[key];
+    if (!current) return;
+    setDay(key, { ...current, [field]: value });
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label htmlFor="ba-tz" className={labelCls}>
+          Your timezone
+        </label>
+        <select
+          id="ba-tz"
+          value={timezone}
+          onChange={(e) => onTimezoneChange(e.target.value)}
+          className={inputCls}
+        >
+          {TIMEZONES.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-white">
+        {DAYS.map(({ key, label }, idx) => {
+          const day = schedule[key];
+          const enabled = Boolean(day);
+          return (
+            <div
+              key={key}
+              className={`grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3 px-3 py-2.5 sm:grid-cols-[72px_auto_minmax(0,1fr)] sm:gap-4 ${
+                idx > 0 ? "border-t border-border" : ""
+              }`}
+            >
+              <span className="text-sm font-semibold text-foreground">
+                {label}
+              </span>
+
+              <label className="flex cursor-pointer items-center gap-2 sm:order-2">
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  onChange={() => toggleDay(key)}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="text-xs font-medium text-muted-foreground">
+                  {enabled ? "Available" : "Unavailable"}
+                </span>
+              </label>
+
+              <div className="col-span-2 flex items-center gap-2 sm:order-3 sm:col-span-1 sm:justify-end">
+                <select
+                  aria-label={`${label} from`}
+                  disabled={!enabled}
+                  value={day?.from ?? "09:00"}
+                  onChange={(e) => setTime(key, "from", e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
+                >
+                  {TIME_OPTIONS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs text-muted-foreground">to</span>
+                <select
+                  aria-label={`${label} to`}
+                  disabled={!enabled}
+                  value={day?.to ?? "17:00"}
+                  onChange={(e) => setTime(key, "to", e.target.value)}
+                  className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
+                >
+                  {TIME_OPTIONS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -109,13 +325,58 @@ export function ApplyForm() {
   const [experienceYears, setExperienceYears] = useState("");
   const [certifications, setCertifications] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
-  const [availability, setAvailability] = useState<string[]>([]);
+  const [timezone, setTimezone] = useState<string>("UTC");
+  const [schedule, setSchedule] = useState<Schedule>(DEFAULT_SCHEDULE);
   const [demoVideo, setDemoVideo] = useState("");
   const [message, setMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  const languagesTouched = useRef(false);
+  const timezoneTouched = useRef(false);
+
+  const suggestedLanguages = country ? COUNTRY_LANGUAGES[country] ?? [] : [];
+
+  useEffect(() => {
+    if (!country) return;
+    if (!languagesTouched.current) {
+      const suggested = COUNTRY_LANGUAGES[country];
+      if (suggested && suggested.length > 0) {
+        setLanguages([suggested[0]]);
+      }
+    }
+    if (!timezoneTouched.current) {
+      const tz = COUNTRY_TIMEZONE[country];
+      if (tz) setTimezone(tz);
+    }
+  }, [country]);
+
+  function handleLanguagesChange(next: string[]) {
+    languagesTouched.current = true;
+    setLanguages(next);
+  }
+
+  function handleTimezoneChange(tz: string) {
+    timezoneTouched.current = true;
+    setTimezone(tz);
+  }
+
+  function scheduleHasAnyDay(): boolean {
+    return DAYS.some(({ key }) => Boolean(schedule[key]));
+  }
+
+  function scheduleIsValid(): { ok: true } | { ok: false; error: string } {
+    for (const { key, label } of DAYS) {
+      const d = schedule[key];
+      if (!d) continue;
+      if (d.from >= d.to) {
+        return { ok: false, error: `${label}: "from" must be earlier than "to".` };
+      }
+    }
+    return { ok: true };
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -126,14 +387,23 @@ export function ApplyForm() {
       !phone ||
       !country ||
       subject.length === 0 ||
-      languages.length === 0 ||
-      availability.length === 0
+      languages.length === 0
     ) {
       setError("Please fill in all required fields.");
       return;
     }
+    if (!scheduleHasAnyDay()) {
+      setError("Please mark at least one day as available.");
+      return;
+    }
+    const valid = scheduleIsValid();
+    if (!valid.ok) {
+      setError(valid.error);
+      return;
+    }
     setLoading(true);
     try {
+      const availabilityJson = JSON.stringify({ timezone, schedule });
       const res = await fetch("/api/teachers/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,7 +416,7 @@ export function ApplyForm() {
           experience_years: Number(experienceYears) || 0,
           certifications,
           languages,
-          availability,
+          availability: availabilityJson,
           demo_video_url: demoVideo,
           message,
         }),
@@ -296,11 +566,18 @@ export function ApplyForm() {
         <span className={labelCls}>
           Languages <span className="text-red-500">*</span>
         </span>
+        {country && suggestedLanguages.length > 0 && (
+          <p className="mb-2 text-xs text-muted-foreground">
+            Common in {country}: {suggestedLanguages.join(", ")}. Check any
+            others you can teach in.
+          </p>
+        )}
         <CheckboxGroup
           name="languages"
           options={LANGUAGES}
           values={languages}
-          onChange={setLanguages}
+          onChange={handleLanguagesChange}
+          highlight={suggestedLanguages}
         />
       </div>
 
@@ -308,11 +585,11 @@ export function ApplyForm() {
         <span className={labelCls}>
           Weekly Availability <span className="text-red-500">*</span>
         </span>
-        <CheckboxGroup
-          name="availability"
-          options={AVAILABILITY}
-          values={availability}
-          onChange={setAvailability}
+        <AvailabilityGrid
+          timezone={timezone}
+          onTimezoneChange={handleTimezoneChange}
+          schedule={schedule}
+          onScheduleChange={setSchedule}
         />
       </div>
 
