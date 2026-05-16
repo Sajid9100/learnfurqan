@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ApplyForm } from "./ApplyForm";
 import {
-  CalendarDays,
-  Globe2,
-  Banknote,
-  Users,
-  TrendingUp,
   FileText,
   CheckCircle2,
   Sparkles,
-  Star,
   ArrowRight,
+  DollarSign,
+  Globe,
+  BookOpen,
+  Star,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,31 +19,6 @@ export const metadata: Metadata = {
   description:
     "Make a living teaching Quran online. Set your own schedule, set your own rate, and get paid weekly via Stripe.",
 };
-
-const BENEFITS = [
-  {
-    icon: CalendarDays,
-    title: "Set your own schedule",
-    description: "Choose when you teach. Block out times that don't work for you.",
-  },
-  {
-    icon: Globe2,
-    title: "Teach from anywhere",
-    description: "All you need is a laptop and a stable internet connection.",
-  },
-  {
-    icon: Banknote,
-    title: "Get paid weekly via Stripe",
-    description:
-      "Connect your Stripe account once. Earnings land in your bank every week.",
-  },
-  {
-    icon: Users,
-    title: "Students waiting for you",
-    description:
-      "We do the marketing. You focus on teaching — students come to you.",
-  },
-];
 
 const STEPS = [
   {
@@ -62,6 +35,27 @@ const STEPS = [
     icon: Sparkles,
     title: "Start earning",
     description: "Set your schedule and rate. Students book — you get paid.",
+  },
+];
+
+const WHY_CARDS = [
+  {
+    icon: DollarSign,
+    title: "Earn on your terms",
+    description:
+      "Set your own rate and schedule. Top teachers earn $300–500 per week teaching from the comfort of home.",
+  },
+  {
+    icon: Globe,
+    title: "Reach students worldwide",
+    description:
+      "Connect with Muslim families in the USA, UK, Canada, Australia and beyond who are actively seeking qualified teachers.",
+  },
+  {
+    icon: BookOpen,
+    title: "Make a real difference",
+    description:
+      "Help students memorize Quran, perfect their Tajweed, and grow in their Islamic knowledge — one class at a time.",
   },
 ];
 
@@ -92,6 +86,8 @@ const FAQS = [
   },
 ];
 
+const APPLY_HREF = "/become-a-teacher/apply";
+
 export default function BecomeATeacherPage() {
   return (
     <main className="relative min-h-screen bg-background">
@@ -113,12 +109,12 @@ export default function BecomeATeacherPage() {
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href="#apply" className="contents">
+              <Link href={APPLY_HREF} className="contents">
                 <Button variant="primary" size="xl">
                   Apply to Teach
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </a>
+              </Link>
               <span className="text-xs text-muted-foreground">
                 Free to apply · 3–5 day review
               </span>
@@ -158,84 +154,71 @@ export default function BecomeATeacherPage() {
         </div>
       </section>
 
-      {/* BENEFITS + FORM */}
-      <section id="apply" className="container scroll-mt-24 pb-24 pt-12 md:pb-32 md:pt-16">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-          <aside className="space-y-6">
-            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
-              Why teach with LearnFurqan?
-            </h2>
-
-            <ul className="space-y-4">
-              {BENEFITS.map(({ icon: Icon, title, description }) => (
-                <li
-                  key={title}
-                  className="flex gap-4 rounded-2xl border border-border bg-white p-5 shadow-soft"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">{title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {description}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
-              <div className="flex items-center gap-2 text-primary">
-                <TrendingUp className="h-5 w-5" />
-                <span className="text-sm font-semibold uppercase tracking-wider">
-                  Earnings
-                </span>
-              </div>
-              <p className="mt-3 font-heading text-2xl font-bold text-foreground sm:text-3xl">
-                Top teachers earn{" "}
-                <span className="text-primary">$300–500/week</span>
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Set your own rate — average $15–25 per class. Most teachers run
-                10–25 classes per week.
-              </p>
-            </div>
-
-            {/* Testimonial */}
-            <figure className="rounded-2xl border border-border bg-white p-6 shadow-soft">
-              <div className="flex gap-0.5 text-yellow-500" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-              <blockquote className="mt-3 text-base text-foreground">
-                &ldquo;LearnFurqan gave me the flexibility to teach Quran from
-                home while earning a great income.&rdquo;
-              </blockquote>
-              <figcaption className="mt-4 text-sm">
-                <span className="font-semibold text-foreground">
-                  Ustadha Fatima M.
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  — Quran &amp; Tajweed Teacher
-                </span>
-              </figcaption>
-            </figure>
-          </aside>
-
-          <div className="rounded-3xl border border-border bg-white p-6 shadow-soft sm:p-8">
-            <h2 className="font-heading text-2xl font-bold text-foreground">
-              Apply now
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              We review within 3–5 business days.
-            </p>
-            <div className="mt-6">
-              <ApplyForm />
-            </div>
-          </div>
+      {/* WHY TEACH */}
+      <section className="container py-20 md:py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Why teach with LearnFurqan?
+          </h2>
+          <p className="mt-3 text-base text-muted-foreground">
+            Built for teachers who care about their craft — and their income.
+          </p>
         </div>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {WHY_CARDS.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-border bg-white p-6 shadow-soft"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 font-heading text-lg font-semibold text-foreground">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Image */}
+        <figure className="mt-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=1200&q=80"
+            alt="Muslim student learning online"
+            loading="lazy"
+            className="h-64 w-full rounded-3xl object-cover shadow-soft sm:h-80 md:h-96"
+          />
+          <figcaption className="mt-3 text-center text-sm text-muted-foreground">
+            Join our growing community of Quran teachers worldwide
+          </figcaption>
+        </figure>
+
+        {/* Testimonial */}
+        <figure className="mx-auto mt-12 max-w-2xl rounded-2xl border border-border bg-white p-6 shadow-soft sm:p-8">
+          <div
+            className="flex gap-0.5 text-yellow-500"
+            aria-label="5 out of 5 stars"
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className="h-4 w-4 fill-current" />
+            ))}
+          </div>
+          <blockquote className="mt-3 text-base text-foreground sm:text-lg">
+            &ldquo;LearnFurqan gave me the flexibility to teach Quran from home
+            while earning a great income.&rdquo;
+          </blockquote>
+          <figcaption className="mt-4 text-sm">
+            <span className="font-semibold text-foreground">
+              Ustadha Fatima M.
+            </span>{" "}
+            <span className="text-muted-foreground">
+              — Quran &amp; Tajweed Teacher
+            </span>
+          </figcaption>
+        </figure>
       </section>
 
       {/* FAQ */}
@@ -284,12 +267,12 @@ export default function BecomeATeacherPage() {
             business days.
           </p>
           <div className="mt-8 flex justify-center">
-            <a href="#apply" className="contents">
+            <Link href={APPLY_HREF} className="contents">
               <Button variant="primary" size="xl">
                 Apply Now
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
