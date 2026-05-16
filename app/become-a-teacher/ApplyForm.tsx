@@ -247,15 +247,15 @@ function AvailabilityGrid({
           return (
             <div
               key={key}
-              className={`grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3 px-3 py-2.5 sm:grid-cols-[72px_auto_minmax(0,1fr)] sm:gap-4 ${
+              className={`flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:flex-nowrap ${
                 idx > 0 ? "border-t border-border" : ""
               }`}
             >
-              <span className="text-sm font-semibold text-foreground">
+              <span className="w-10 shrink-0 text-sm font-semibold text-foreground">
                 {label}
               </span>
 
-              <label className="flex cursor-pointer items-center gap-2 sm:order-2">
+              <label className="flex w-[140px] shrink-0 cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
                   checked={enabled}
@@ -267,7 +267,7 @@ function AvailabilityGrid({
                 </span>
               </label>
 
-              <div className="col-span-2 flex items-center gap-2 sm:order-3 sm:col-span-1 sm:justify-end">
+              <div className="flex flex-1 items-center justify-end gap-2">
                 <input
                   type="time"
                   aria-label={`${label} from`}
@@ -277,7 +277,7 @@ function AvailabilityGrid({
                   step={1800}
                   value={day?.from ?? "09:00"}
                   onChange={(e) => setTime(key, "from", e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
+                  className="h-9 w-[110px] shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
                 />
                 <span className="text-xs text-muted-foreground">to</span>
                 <input
@@ -289,7 +289,7 @@ function AvailabilityGrid({
                   step={1800}
                   value={day?.to ?? "17:00"}
                   onChange={(e) => setTime(key, "to", e.target.value)}
-                  className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
+                  className="h-9 w-[110px] shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
                 />
               </div>
             </div>
