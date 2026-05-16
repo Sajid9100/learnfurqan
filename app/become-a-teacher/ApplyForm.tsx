@@ -117,18 +117,6 @@ const DAYS: { key: DayKey; label: string }[] = [
   { key: "sun", label: "Sun" },
 ];
 
-const TIME_OPTIONS = (() => {
-  const out: string[] = [];
-  for (let h = 0; h < 24; h++) {
-    for (const m of [0, 30]) {
-      out.push(
-        `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`
-      );
-    }
-  }
-  return out;
-})();
-
 type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 type DaySchedule = { from: string; to: string } | null;
 type Schedule = Record<DayKey, DaySchedule>;
@@ -280,33 +268,29 @@ function AvailabilityGrid({
               </label>
 
               <div className="col-span-2 flex items-center gap-2 sm:order-3 sm:col-span-1 sm:justify-end">
-                <select
+                <input
+                  type="time"
                   aria-label={`${label} from`}
                   disabled={!enabled}
+                  min="00:00"
+                  max="23:30"
+                  step={1800}
                   value={day?.from ?? "09:00"}
                   onChange={(e) => setTime(key, "from", e.target.value)}
                   className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
-                >
-                  {TIME_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                />
                 <span className="text-xs text-muted-foreground">to</span>
-                <select
+                <input
+                  type="time"
                   aria-label={`${label} to`}
                   disabled={!enabled}
+                  min="00:00"
+                  max="23:30"
+                  step={1800}
                   value={day?.to ?? "17:00"}
                   onChange={(e) => setTime(key, "to", e.target.value)}
                   className="h-9 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
-                >
-                  {TIME_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
           );
