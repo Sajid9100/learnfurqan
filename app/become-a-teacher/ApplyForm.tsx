@@ -240,14 +240,14 @@ function AvailabilityGrid({
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
         {DAYS.map(({ key, label }, idx) => {
           const day = schedule[key];
           const enabled = Boolean(day);
           return (
             <div
               key={key}
-              className={`flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:flex-nowrap ${
+              className={`flex w-max min-w-full items-center gap-x-4 px-4 py-3 ${
                 idx > 0 ? "border-t border-border" : ""
               }`}
             >
@@ -267,7 +267,7 @@ function AvailabilityGrid({
                 </span>
               </label>
 
-              <div className="flex flex-1 items-center justify-end gap-2">
+              <div className="flex items-center gap-2">
                 {enabled ? (
                   <>
                     <input
@@ -278,9 +278,11 @@ function AvailabilityGrid({
                       step={1800}
                       value={day?.from ?? "09:00"}
                       onChange={(e) => setTime(key, "from", e.target.value)}
-                      className="h-9 w-36 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                      className="h-9 w-32 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
                     />
-                    <span className="text-xs text-muted-foreground">to</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      to
+                    </span>
                     <input
                       type="time"
                       aria-label={`${label} to`}
@@ -289,7 +291,7 @@ function AvailabilityGrid({
                       step={1800}
                       value={day?.to ?? "17:00"}
                       onChange={(e) => setTime(key, "to", e.target.value)}
-                      className="h-9 w-36 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                      className="h-9 w-32 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
                     />
                   </>
                 ) : (
