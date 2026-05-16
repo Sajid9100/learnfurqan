@@ -97,15 +97,12 @@ export function LoginForm() {
             siteKey={SITE_KEY}
             options={{ theme: "light" }}
             onSuccess={(token) => {
-              console.log("[turnstile] onSuccess fired, token_len=", token.length);
               setCaptchaToken(token);
             }}
             onExpire={() => {
-              console.log("[turnstile] onExpire");
               setCaptchaToken(null);
             }}
-            onError={(err) => {
-              console.log("[turnstile] onError", err);
+            onError={() => {
               setCaptchaToken(null);
             }}
           />

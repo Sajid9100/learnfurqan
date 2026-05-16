@@ -19,19 +19,7 @@ const TURNSTILE_VERIFY_URL =
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  console.log(
-    "[turnstile-debug] secret_present=", Boolean(secret),
-    "secret_len=", secret?.length ?? 0,
-    "secret_prefix=", secret?.slice(0, 4),
-    "secret_tail=", secret?.slice(-4),
-    "looks_like_turnstile=", Boolean(secret && /^0x4A/.test(secret) && secret.length >= 30 && secret.length <= 50)
-  );
-  console.log("[turnstile-debug] token_present=", Boolean(token), "token_len=", token?.length ?? 0, "token_prefix=", token?.slice(0, 12));
-  console.log("[turnstile-debug] verify_url=", TURNSTILE_VERIFY_URL, "ip=", ip);
-  if (!secret) {
-    console.log("[turnstile-debug] no secret set, returning false");
-    return false;
-  }
+  if (!secret) return false;
   try {
     const form = new URLSearchParams();
     form.set("secret", secret);
@@ -41,20 +29,13 @@ async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
       method: "POST",
       body: form,
     });
-    const text = await res.text();
-    console.log("[turnstile-debug] cf_status=", res.status, "cf_body=", text);
     if (!res.ok) return false;
-    let data: { success?: boolean; "error-codes"?: string[] };
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.log("[turnstile-debug] cf_json_parse_error=", e);
-      return false;
-    }
-    console.log("[turnstile-debug] cf_success=", data.success, "cf_error_codes=", data["error-codes"]);
+    const data = (await res.json()) as {
+      success?: boolean;
+      "error-codes"?: string[];
+    };
     return data.success === true;
-  } catch (e) {
-    console.log("[turnstile-debug] fetch_threw=", e);
+  } catch {
     return false;
   }
 }
