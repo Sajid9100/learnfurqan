@@ -268,29 +268,35 @@ function AvailabilityGrid({
               </label>
 
               <div className="flex flex-1 items-center justify-end gap-2">
-                <input
-                  type="time"
-                  aria-label={`${label} from`}
-                  disabled={!enabled}
-                  min="00:00"
-                  max="23:30"
-                  step={1800}
-                  value={day?.from ?? "09:00"}
-                  onChange={(e) => setTime(key, "from", e.target.value)}
-                  className="h-9 w-[110px] shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
-                />
-                <span className="text-xs text-muted-foreground">to</span>
-                <input
-                  type="time"
-                  aria-label={`${label} to`}
-                  disabled={!enabled}
-                  min="00:00"
-                  max="23:30"
-                  step={1800}
-                  value={day?.to ?? "17:00"}
-                  onChange={(e) => setTime(key, "to", e.target.value)}
-                  className="h-9 w-[110px] shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-muted/40 disabled:text-muted-foreground"
-                />
+                {enabled ? (
+                  <>
+                    <input
+                      type="time"
+                      aria-label={`${label} from`}
+                      min="00:00"
+                      max="23:30"
+                      step={1800}
+                      value={day?.from ?? "09:00"}
+                      onChange={(e) => setTime(key, "from", e.target.value)}
+                      className="h-9 w-36 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                    />
+                    <span className="text-xs text-muted-foreground">to</span>
+                    <input
+                      type="time"
+                      aria-label={`${label} to`}
+                      min="00:00"
+                      max="23:30"
+                      step={1800}
+                      value={day?.to ?? "17:00"}
+                      onChange={(e) => setTime(key, "to", e.target.value)}
+                      className="h-9 w-36 shrink-0 rounded-lg border border-border bg-white px-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                    />
+                  </>
+                ) : (
+                  <span className="text-xs italic text-muted-foreground">
+                    Not available
+                  </span>
+                )}
               </div>
             </div>
           );
