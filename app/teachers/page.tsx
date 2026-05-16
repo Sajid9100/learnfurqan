@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { GraduationCap } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import { TeachersListing } from "@/components/teachers/TeachersListing";
 import { TEACHERS } from "@/lib/teachers-data";
 
@@ -28,6 +31,18 @@ export default function TeachersPage() {
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               Browse verified teachers from around the world.
             </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <p className="text-sm text-muted-foreground">
+                Are you a teacher?
+              </p>
+              <Link href="/become-a-teacher" className="contents">
+                <Button variant="outline" size="md">
+                  <GraduationCap className="h-4 w-4" />
+                  Join LearnFurqan
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
