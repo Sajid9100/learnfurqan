@@ -2,15 +2,10 @@
 
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CATEGORIES } from "@/lib/categories";
 
 export type GenderFilter = "all" | "male" | "female";
-export type SubjectFilter =
-  | "all"
-  | "tajweed"
-  | "kids"
-  | "hifz"
-  | "arabic"
-  | "reverts";
+export type SubjectFilter = "all" | string;
 export type LanguageFilter = "all" | "english" | "urdu" | "arabic";
 export type SortOption =
   | "rating"
@@ -20,11 +15,7 @@ export type SortOption =
 
 export const SUBJECT_OPTIONS: { value: SubjectFilter; label: string }[] = [
   { value: "all", label: "All Subjects" },
-  { value: "tajweed", label: "Quran & Tajweed" },
-  { value: "kids", label: "Kids" },
-  { value: "hifz", label: "Hifz" },
-  { value: "arabic", label: "Arabic" },
-  { value: "reverts", label: "Reverts" },
+  ...CATEGORIES.map((c) => ({ value: c.id, label: c.name })),
 ];
 
 export const LANGUAGE_OPTIONS: { value: LanguageFilter; label: string }[] = [

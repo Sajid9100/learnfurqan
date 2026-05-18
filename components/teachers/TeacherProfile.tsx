@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import {
   Star,
@@ -30,9 +31,21 @@ export function TeacherProfile({
   teacher: Teacher;
   reviews: Review[];
 }) {
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
   const languages = teacher.language.split(",").map((l) => l.trim());
   const studentEstimate = Math.max(40, teacher.review_count * 2);
   const hasReviews = teacher.review_count > 0;
+
+  const handleBookTrial = () => {
+    if (!isSignedIn) {
+      router.push(
+        "/sign-in?redirect_url=" + encodeURIComponent(window.location.pathname)
+      );
+      return;
+    }
+    router.push(`/book/${teacher.slug}`);
+  };
 
   return (
     <div className="container py-10 md:py-16">
@@ -99,15 +112,14 @@ export function TeacherProfile({
               </div>
 
               <div className="mt-5 space-y-2">
-                <Link href={`/book/${teacher.slug}`} className="block">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="w-full shadow-glow"
-                  >
-                    Book Free Trial
-                  </Button>
-                </Link>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full shadow-glow"
+                  onClick={handleBookTrial}
+                >
+                  Book Free Trial
+                </Button>
                 <Button variant="outline" size="lg" className="w-full">
                   <MessageSquare className="h-4 w-4" />
                   Send Message

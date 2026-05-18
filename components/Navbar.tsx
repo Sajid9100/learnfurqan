@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -16,16 +17,17 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/#home" },
-  { label: "Courses", href: "/#features" },
+  { label: "Home", href: "/" },
+  { label: "Courses", href: "/courses" },
   { label: "Teachers", href: "/teachers" },
   { label: "Become a Teacher", href: "/become-a-teacher" },
-  { label: "About", href: "/#about" },
+  { label: "About", href: "/about" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -40,6 +42,12 @@ export function Navbar() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
+
+  const isActive = (href: string) => {
+    if (href.startsWith("/#")) return pathname === "/";
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <header
@@ -84,40 +92,70 @@ export function Navbar() {
         </div>
 
         <button
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label="Open menu"
           aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition hover:bg-primary/10 hover:text-primary lg:hidden"
+          onClick={() => setMobileOpen(true)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#0a2e1e] transition hover:bg-[#0a2e1e]/5 lg:hidden"
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <Menu className="h-6 w-6" strokeWidth={2} />
         </button>
       </div>
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-border/60 bg-background/95 glass-blur lg:hidden"
-          >
-            <div className="container flex flex-col gap-1 py-4">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-xl px-4 py-3 text-base font-medium text-foreground hover:bg-primary/10 hover:text-primary"
-                >
-                  {link.label}
-                </Link>
-              ))}
+          <>
+            <motion.div
+              key="mobile-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+              aria-hidden="true"
+            />
+            <motion.aside
+              key="mobile-drawer"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
+              className="fixed right-0 top-0 z-50 flex h-full w-[280px] flex-col overflow-y-auto bg-white p-6 shadow-2xl lg:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+            >
+              <button
+                aria-label="Close menu"
+                onClick={() => setMobileOpen(false)}
+                className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <nav className="mt-12 flex flex-col gap-1">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "py-2 text-lg font-medium transition-colors",
+                      isActive(link.href)
+                        ? "text-[#c9a84c]"
+                        : "text-[#0a2e1e] hover:text-[#c9a84c]"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="my-5 border-t border-gray-200" />
 
               <MobileAuthedActions onNavigate={() => setMobileOpen(false)} />
               <SignedOut>
-                <div className="mt-3 grid grid-cols-2 gap-2 px-1">
+                <div className="mt-3 flex flex-col gap-2">
                   <Link
                     href="/sign-in"
                     onClick={() => setMobileOpen(false)}
@@ -133,13 +171,13 @@ export function Navbar() {
                     className="contents"
                   >
                     <Button variant="primary" size="md" className="w-full">
-                      Free Trial
+                      Start Free Trial
                     </Button>
                   </Link>
                 </div>
               </SignedOut>
-            </div>
-          </motion.div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </header>

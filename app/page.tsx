@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
+import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { TrustSection } from "@/components/TrustSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -13,6 +14,7 @@ export default function HomePage() {
     <main className="relative">
       <Navbar />
       <HeroSection />
+      <CategoriesSection />
       <TrustSection />
       <FeaturesSection />
       <HowItWorks />

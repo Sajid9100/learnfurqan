@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { BookOpen, Star, Languages, Clock, Sparkles } from "lucide-react";
 import { TeacherAvatar } from "./TeacherAvatar";
@@ -15,6 +17,19 @@ export function TeacherCard({
   teacher: Teacher;
   index?: number;
 }) {
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
+
+  const handleBookTrial = () => {
+    if (!isSignedIn) {
+      router.push(
+        "/sign-in?redirect_url=" + encodeURIComponent(window.location.pathname)
+      );
+      return;
+    }
+    router.push(`/book/${teacher.slug}`);
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -91,11 +106,14 @@ export function TeacherCard({
             View Profile
           </Button>
         </Link>
-        <Link href={`/book/${teacher.slug}`} className="contents">
-          <Button variant="primary" size="sm" className="w-full">
-            Book Trial
-          </Button>
-        </Link>
+        <Button
+          variant="primary"
+          size="sm"
+          className="w-full"
+          onClick={handleBookTrial}
+        >
+          Book Trial
+        </Button>
       </div>
     </motion.article>
   );

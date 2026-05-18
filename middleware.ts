@@ -4,7 +4,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isProtectedPage = createRouteMatcher([
   "/dashboard(.*)",
   "/parent(.*)",
-  "/teacher(.*)",
+  "/teacher",
+  "/teacher/(.*)",
 ]);
 const isProtectedApi = createRouteMatcher([
   "/api/student(.*)",

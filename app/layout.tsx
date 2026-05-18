@@ -44,7 +44,7 @@ export default function RootLayout({
   const tree = (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
+        <div className="page-transition">{children}</div>
       </body>
     </html>
   );

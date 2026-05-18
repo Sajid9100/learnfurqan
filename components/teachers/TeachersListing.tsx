@@ -42,7 +42,16 @@ export function TeachersListing({ teachers }: { teachers: Teacher[] }) {
     }
     if (filters.subject !== "all") {
       const re = SUBJECT_KEYWORDS[filters.subject];
-      list = list.filter((t) => re.test(t.subject));
+      if (re) {
+        list = list.filter((t) => re.test(t.subject));
+      } else {
+        // For new category ids, match by checking if teacher subject contains any word from the category name
+        const categoryName = filters.subject.replace(/-/g, ' ').toLowerCase();
+        list = list.filter((t) =>
+          t.subject.toLowerCase().includes(categoryName) ||
+          categoryName.includes(t.subject.toLowerCase())
+        );
+      }
     }
     if (filters.language !== "all") {
       const re = LANGUAGE_KEYWORDS[filters.language];
