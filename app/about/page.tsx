@@ -4,6 +4,14 @@ import {
   CalendarClock,
   Wallet,
   ArrowRight,
+  Building2,
+  BookOpen,
+  Globe,
+  Users,
+  Star,
+  Handshake,
+  CheckCircle,
+  type LucideIcon,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -21,21 +29,41 @@ const HERO_STATS = [
   { value: "50+", label: "Countries" },
 ];
 
-const MISSION_CARDS = [
+const MISSION_CARDS: {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  bullets: string[];
+}[] = [
   {
     icon: ShieldCheck,
     title: "Verified Teachers",
     desc: "Every instructor is vetted for credentials, Tajweed mastery, and teaching ability.",
+    bullets: [
+      "Manual verification process",
+      "Tajweed & Ijazah certified",
+      "Background checked",
+    ],
   },
   {
     icon: CalendarClock,
     title: "Flexible Scheduling",
     desc: "Book lessons that fit your life — across every time zone, day or night.",
+    bullets: [
+      "Book 24/7 online",
+      "Reschedule anytime",
+      "Any timezone worldwide",
+    ],
   },
   {
     icon: Wallet,
     title: "Affordable Pricing",
     desc: "Quality Quran education at a price that works for families everywhere.",
+    bullets: [
+      "Starting from $5/lesson",
+      "No subscription required",
+      "Free trial lesson included",
+    ],
   },
 ];
 
@@ -46,34 +74,34 @@ const BIG_STATS = [
   { value: "4.9/5", label: "Average Rating" },
 ];
 
-const VALUES = [
+const VALUES: { Icon: LucideIcon; title: string; desc: string }[] = [
   {
-    emoji: "🕌",
+    Icon: Building2,
     title: "Islamic Integrity",
     desc: "Every teacher is verified and every lesson upholds Islamic values.",
   },
   {
-    emoji: "📚",
+    Icon: BookOpen,
     title: "Quality Education",
     desc: "Structured curriculum designed by Islamic scholars.",
   },
   {
-    emoji: "🌍",
+    Icon: Globe,
     title: "Global Access",
     desc: "Students from 50+ countries learn on LearnFurqan.",
   },
   {
-    emoji: "👨‍👩‍👧",
+    Icon: Users,
     title: "Family First",
     desc: "Safe, family-friendly environment for all ages.",
   },
   {
-    emoji: "⭐",
+    Icon: Star,
     title: "Proven Results",
     desc: "Thousands of students have completed Hifz and Tajweed programs.",
   },
   {
-    emoji: "🤝",
+    Icon: Handshake,
     title: "Teacher Support",
     desc: "We invest in our teachers with training and fair compensation.",
   },
@@ -93,7 +121,7 @@ export default function AboutPage() {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-pattern-islamic pb-20 pt-16 md:pb-28 md:pt-24">
+      <section className="relative overflow-hidden bg-pattern-islamic pb-8 pt-16 md:pb-12 md:pt-24">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -top-24 h-72 bg-gradient-to-b from-[#0a2e1e]/[0.06] to-transparent"
@@ -103,7 +131,7 @@ export default function AboutPage() {
             <Badge>Our Story</Badge>
             <h1 className="mt-6 font-heading text-4xl font-bold leading-tight tracking-tight text-[#0a2e1e] sm:text-5xl md:text-6xl">
               Making Quran Education{" "}
-              <span className="bg-gradient-to-r from-[#0a2e1e] via-[#1a5d3f] to-[#3a8a5f] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#0a2e1e] via-[#0a2e1e] to-[#c9a84c] bg-clip-text text-transparent">
                 Accessible to All
               </span>
             </h1>
@@ -132,7 +160,7 @@ export default function AboutPage() {
       </section>
 
       {/* MISSION */}
-      <section className="bg-pattern-islamic py-20 md:py-28">
+      <section className="bg-pattern-islamic pb-20 pt-8 md:pb-28 md:pt-12">
         <div className="container">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
@@ -152,22 +180,35 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {MISSION_CARDS.map((card) => (
                 <div
                   key={card.title}
-                  className="group flex items-start gap-5 rounded-2xl border border-gray-200/80 bg-white p-6 shadow-[0_1px_0_rgba(10,46,30,0.04)] transition-all hover:-translate-y-0.5 hover:border-[#0a2e1e]/20 hover:shadow-lg"
+                  className="group rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#c9a84c] hover:shadow-md"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/8 text-[#0a2e1e] transition-colors group-hover:bg-[#0a2e1e] group-hover:text-white">
-                    <card.icon className="h-6 w-6" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <h3 className="font-heading text-lg font-semibold text-[#0a2e1e]">
-                      {card.title}
-                    </h3>
-                    <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                      {card.desc}
-                    </p>
+                  <div className="flex items-start gap-5">
+                    <div className="flex shrink-0 items-center justify-center rounded-xl bg-[#e8efec] p-3 text-[#0a2e1e]">
+                      <card.icon className="h-10 w-10" strokeWidth={1.75} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-heading text-xl font-semibold text-[#0a2e1e]">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                        {card.desc}
+                      </p>
+                      <ul className="mt-4 space-y-2">
+                        {card.bullets.map((b) => (
+                          <li
+                            key={b}
+                            className="flex items-start gap-2 text-sm text-gray-700"
+                          >
+                            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a84c]" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -226,8 +267,8 @@ export default function AboutPage() {
                   aria-hidden
                   className="absolute inset-x-7 top-0 h-0.5 origin-left scale-x-0 bg-[#c9a84c] transition-transform duration-300 group-hover:scale-x-100"
                 />
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-2xl">
-                  {v.emoji}
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-[#0a2e1e]">
+                  <v.Icon className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 font-heading text-lg font-semibold text-[#0a2e1e]">
                   {v.title}

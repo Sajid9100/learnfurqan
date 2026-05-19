@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { Category } from "@/lib/categories";
+import { type Category, getCategoryById } from "@/lib/categories";
+import { Flag } from "@/components/ui/Flag";
 
 type Gender = "Any" | "Male" | "Female";
 type ExperienceBucket = "Any" | "1-3" | "3-5" | "5+";
@@ -43,7 +44,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "AS",
     avatarColor: "#fce4ec",
     country: "Pakistan",
-    flag: "🇵🇰",
+    flag: "pk",
     gender: "Female",
     verified: true,
     rating: 4.9,
@@ -62,7 +63,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "AH",
     avatarColor: "#e3f2fd",
     country: "Egypt",
-    flag: "🇪🇬",
+    flag: "eg",
     gender: "Male",
     verified: true,
     rating: 5.0,
@@ -81,7 +82,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "BA",
     avatarColor: "#e8f5e9",
     country: "Pakistan",
-    flag: "🇵🇰",
+    flag: "pk",
     gender: "Male",
     verified: true,
     rating: 4.8,
@@ -100,7 +101,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "MT",
     avatarColor: "#fff8e1",
     country: "Jordan",
-    flag: "🇯🇴",
+    flag: "jo",
     gender: "Female",
     verified: true,
     rating: 4.9,
@@ -119,7 +120,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "UT",
     avatarColor: "#f3e5f5",
     country: "Pakistan",
-    flag: "🇵🇰",
+    flag: "pk",
     gender: "Male",
     verified: true,
     rating: 4.7,
@@ -138,7 +139,7 @@ const BASE_TEACHERS: Teacher[] = [
     initials: "YI",
     avatarColor: "#e0f7fa",
     country: "Saudi Arabia",
-    flag: "🇸🇦",
+    flag: "sa",
     gender: "Male",
     verified: true,
     rating: 4.95,
@@ -179,7 +180,14 @@ function CheckIcon({ className = "" }: { className?: string }) {
   );
 }
 
-export function CategoryBrowser({ category }: { category: Category }) {
+export function CategoryBrowser({ categoryId }: { categoryId: string }) {
+  const category = getCategoryById(categoryId);
+  if (!category) return null;
+
+  return <CategoryBrowserInner category={category} />;
+}
+
+function CategoryBrowserInner({ category }: { category: Category }) {
   const [priceMaxInput, setPriceMaxInput] = useState(PRICE_MAX);
   const [priceMax, setPriceMax] = useState(PRICE_MAX);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
@@ -259,11 +267,8 @@ export function CategoryBrowser({ category }: { category: Category }) {
       <section className="border-b border-border bg-white">
         <div className="container py-8 md:py-10">
           <div className="flex flex-col items-center gap-4 text-center">
-            <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-3xl shadow-inner"
-              style={{ backgroundColor: category.color }}
-            >
-              <span className="leading-none">{category.emoji}</span>
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#0a2e1e] text-[#c9a84c] shadow-inner">
+              <category.Icon className="h-8 w-8" />
             </div>
             <h1 className="font-heading text-4xl font-bold leading-tight text-[#0a2e1e] sm:text-5xl">
               Find Your{" "}
@@ -385,7 +390,7 @@ export function CategoryBrowser({ category }: { category: Category }) {
                 </div>
               ) : (
                 <div className="mt-6 rounded-2xl border border-dashed border-border bg-white p-10 text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#0a2e1e]/10 text-[#0a2e1e]">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -465,11 +470,8 @@ function FilterPanel(props: FilterPanelProps) {
   return (
     <div className="rounded-2xl border border-border bg-white p-5 shadow-soft">
       <div className="flex items-center gap-3 border-b border-border pb-4">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-lg"
-          style={{ backgroundColor: category.color }}
-        >
-          <span className="leading-none">{category.emoji}</span>
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0a2e1e] text-[#c9a84c]">
+          <category.Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -669,7 +671,7 @@ function TeacherCard({ teacher }: { teacher: Teacher }) {
             </h3>
             {teacher.verified && (
               <span
-                className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white"
+                className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#0a2e1e] text-white"
                 title="Verified teacher"
                 aria-label="Verified"
               >
@@ -677,8 +679,8 @@ function TeacherCard({ teacher }: { teacher: Teacher }) {
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            <span className="mr-1" aria-hidden>{teacher.flag}</span>
+          <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Flag code={teacher.flag} size="sm" label={teacher.country} />
             {teacher.country} · {teacher.years}{" "}
             {teacher.years === 1 ? "year" : "years"} experience
           </p>

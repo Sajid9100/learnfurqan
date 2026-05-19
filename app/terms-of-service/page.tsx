@@ -206,9 +206,57 @@ export default function TermsOfServicePage() {
               </p>
             </section>
 
+            <section id="code-of-conduct" className="scroll-mt-24">
+              <h2 className="font-heading text-xl font-semibold text-[#0a2e1e] sm:text-2xl">
+                13. Code of Conduct (Teachers &amp; Students)
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-gray-600">
+                Everyone on LearnFurqan is expected to uphold the following
+                standards:
+              </p>
+              <ul className="mt-3 list-inside list-disc space-y-1.5 text-base leading-relaxed text-gray-600">
+                <li>
+                  Treat every student, parent, and teacher with the respect,
+                  patience, and adab the Quran calls us to.
+                </li>
+                <li>
+                  Show up on time, prepared, and dressed appropriately for live
+                  video classes.
+                </li>
+                <li>
+                  Never share, record, or distribute lessons without all
+                  participants&apos; written consent.
+                </li>
+                <li>
+                  Keep all communication on LearnFurqan&apos;s messaging — do
+                  not solicit payments, contact details, or off-platform
+                  bookings.
+                </li>
+                <li>
+                  Zero tolerance for harassment, discrimination, sectarian
+                  attacks, or inappropriate content with minors. Violations
+                  lead to immediate removal.
+                </li>
+                <li>
+                  Teachers are responsible for the accuracy of credentials they
+                  submit and for teaching only subjects they are qualified for.
+                </li>
+              </ul>
+              <p className="mt-3 text-base leading-relaxed text-gray-600">
+                Report concerns to{" "}
+                <a
+                  href="mailto:safety@learnfurqan.com"
+                  className="font-semibold text-[#0a2e1e] underline-offset-4 hover:text-[#c9a84c] hover:underline"
+                >
+                  safety@learnfurqan.com
+                </a>
+                .
+              </p>
+            </section>
+
             <section>
               <h2 className="font-heading text-xl font-semibold text-[#0a2e1e] sm:text-2xl">
-                13. Contact
+                14. Contact
               </h2>
               <p className="mt-3 text-base leading-relaxed text-gray-600">
                 For legal questions, write to{" "}

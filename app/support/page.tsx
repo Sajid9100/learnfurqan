@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Mail, MessageCircle, Clock, Moon } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
@@ -29,8 +29,10 @@ export default function SupportPage() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const next: Errors = {};
     if (!name.trim()) next.name = "Please enter your full name.";
@@ -41,7 +43,26 @@ export default function SupportPage() {
     if (!message.trim()) next.message = "Please write a message.";
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    setSubmittedEmail(email);
+
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, subject, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubmitError(data?.error || "Could not send your message. Please try again.");
+        return;
+      }
+      setSubmittedEmail(email);
+    } catch {
+      setSubmitError("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -50,6 +71,7 @@ export default function SupportPage() {
     setSubject("");
     setMessage("");
     setErrors({});
+    setSubmitError(null);
     setSubmittedEmail(null);
   };
 
@@ -71,7 +93,7 @@ export default function SupportPage() {
             </span>
             <h1 className="mt-6 font-heading text-4xl font-bold leading-tight tracking-tight text-[#0a2e1e] sm:text-5xl md:text-6xl">
               We&apos;re Here to{" "}
-              <span className="bg-gradient-to-r from-[#0a2e1e] via-[#1a5d3f] to-[#3a8a5f] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#0a2e1e] via-[#0a2e1e] to-[#c9a84c] bg-clip-text text-transparent">
                 Help
               </span>
             </h1>
@@ -101,7 +123,7 @@ export default function SupportPage() {
                       <span className="font-semibold text-[#0a2e1e]">
                         {submittedEmail}
                       </span>{" "}
-                      within 24 hours. JazakAllah Khair 🌿
+                      within 24 hours. JazakAllah Khair.
                     </p>
                     <button
                       type="button"
@@ -217,12 +239,22 @@ export default function SupportPage() {
                       )}
                     </div>
 
+                    {submitError && (
+                      <p
+                        role="alert"
+                        className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                      >
+                        {submitError}
+                      </p>
+                    )}
+
                     <button
                       type="submit"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2e1e] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f4a31] hover:shadow-lg active:scale-[0.99]"
+                      disabled={submitting}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2e1e] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f4a31] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Send Message
-                      <ArrowRight className="h-4 w-4" />
+                      {submitting ? "Sending..." : "Send Message"}
+                      {!submitting && <ArrowRight className="h-4 w-4" />}
                     </button>
                   </form>
                 )}
@@ -239,8 +271,8 @@ export default function SupportPage() {
 
                   <ul className="mt-6 space-y-5">
                     <li className="flex items-start gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-xl">
-                        📧
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-[#0a2e1e]">
+                        <Mail className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
                         <div className="text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -255,8 +287,8 @@ export default function SupportPage() {
                       </div>
                     </li>
                     <li className="flex items-start gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-xl">
-                        💬
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-[#0a2e1e]">
+                        <MessageCircle className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
                         <div className="text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -273,8 +305,8 @@ export default function SupportPage() {
                       </div>
                     </li>
                     <li className="flex items-start gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-xl">
-                        🕐
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a2e1e]/[0.06] text-[#0a2e1e]">
+                        <Clock className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
                         <div className="text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -289,9 +321,12 @@ export default function SupportPage() {
 
                   <div className="my-6 border-t border-gray-100" />
 
-                  <div className="rounded-xl border border-[#0a2e1e]/10 bg-[#ecfdf5] px-4 py-3.5 text-sm leading-relaxed text-[#0a2e1e]">
-                    🌙 Our support team is available Saturday to Thursday,{" "}
-                    <span className="font-semibold">9 AM – 9 PM PKT</span>
+                  <div className="flex items-start gap-3 rounded-xl border border-[#0a2e1e]/10 bg-[#e8efec] px-4 py-3.5 text-sm leading-relaxed text-[#0a2e1e]">
+                    <Moon className="mt-0.5 h-4 w-4 shrink-0 text-[#c9a84c]" />
+                    <span>
+                      Our support team is available Saturday to Thursday,{" "}
+                      <span className="font-semibold">9 AM – 9 PM PKT</span>
+                    </span>
                   </div>
                 </div>
 

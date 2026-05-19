@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Search,
+  Calendar,
+  GraduationCap,
+  TrendingUp,
+  CheckCircle,
+  Shield,
+  BadgeDollarSign,
+  type LucideIcon,
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,37 +21,37 @@ export const metadata = {
     "From registration to your first lesson in less than 10 minutes. Learn how to find a verified Quran teacher, book a free trial, and start your journey.",
 };
 
-const STEPS = [
+const STEPS: { n: string; Icon: LucideIcon; title: string; desc: string }[] = [
   {
     n: "01",
-    emoji: "🔍",
+    Icon: Search,
     title: "Find Your Teacher",
     desc: "Browse 1,200+ verified Quran and Islamic teachers. Filter by subject, language, price, and availability.",
   },
   {
     n: "02",
-    emoji: "📅",
+    Icon: Calendar,
     title: "Book a Free Trial",
     desc: "Schedule a free 30-minute trial lesson at a time that suits you. No payment required upfront.",
   },
   {
     n: "03",
-    emoji: "🎓",
+    Icon: GraduationCap,
     title: "Start Learning",
     desc: "Join your live 1-on-1 class via video call. Learn from the comfort of your home.",
   },
   {
     n: "04",
-    emoji: "📈",
+    Icon: TrendingUp,
     title: "Track Progress",
     desc: "Get regular feedback, track your Quran journey, and level up at your own pace.",
   },
 ];
 
-const FEATURES = [
-  { emoji: "✅", title: "No contracts", desc: "Cancel anytime" },
-  { emoji: "🔒", title: "Safe & verified", desc: "Every teacher vetted" },
-  { emoji: "💰", title: "Money-back guarantee", desc: "Risk-free trial" },
+const FEATURES: { Icon: LucideIcon; title: string; desc: string }[] = [
+  { Icon: CheckCircle, title: "No contracts", desc: "Cancel anytime" },
+  { Icon: Shield, title: "Safe & verified", desc: "Every teacher vetted" },
+  { Icon: BadgeDollarSign, title: "Money-back guarantee", desc: "Risk-free trial" },
 ];
 
 const FAQ_PREVIEW = [
@@ -118,8 +129,8 @@ export default function HowItWorksPage() {
                         <div className="font-heading text-[5rem] font-bold leading-none tracking-tighter text-[#c9a84c] sm:text-[6rem]">
                           {step.n}
                         </div>
-                        <div className="mt-4 text-5xl sm:text-6xl">
-                          {step.emoji}
+                        <div className="mt-4 text-[#0a2e1e]">
+                          <step.Icon className="h-14 w-14 sm:h-16 sm:w-16" strokeWidth={1.75} />
                         </div>
                       </div>
                     </div>
@@ -163,7 +174,9 @@ export default function HowItWorksPage() {
                 key={f.title}
                 className="flex items-start gap-4 sm:flex-col sm:items-center sm:text-center"
               >
-                <div className="text-3xl">{f.emoji}</div>
+                <div className="text-[#c9a84c]">
+                  <f.Icon className="h-7 w-7" />
+                </div>
                 <div>
                   <div className="font-heading text-lg font-semibold text-white">
                     {f.title}

@@ -23,7 +23,7 @@ export default function CategoryPage({ params }: Props) {
   return (
     <main className="relative min-h-screen bg-background">
       <Navbar />
-      <CategoryBrowser category={category} />
+      <CategoryBrowser categoryId={category.id} />
       <Footer />
     </main>
   );

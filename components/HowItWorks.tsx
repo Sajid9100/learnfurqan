@@ -1,6 +1,12 @@
 "use client";
 
-import { Search, CalendarCheck, BookOpen, type LucideIcon } from "lucide-react";
+import {
+  Search,
+  CalendarCheck,
+  GraduationCap,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 import { Reveal } from "./ui/Reveal";
 
 type Step = {
@@ -14,23 +20,30 @@ const STEPS: Step[] = [
   {
     number: "01",
     icon: Search,
-    title: "Choose Your Teacher",
+    title: "Find Your Teacher",
     description:
-      "Browse verified teachers by specialization, gender, and price. Read reviews from real parents.",
+      "Browse verified teachers by specialization, gender, language, and price.",
   },
   {
     number: "02",
     icon: CalendarCheck,
     title: "Book a Free Trial",
     description:
-      "Pick a time that works for you and meet your teacher in a no-commitment trial class.",
+      "Schedule a free 30-minute trial at a time that suits you. No payment required.",
   },
   {
     number: "03",
-    icon: BookOpen,
+    icon: GraduationCap,
     title: "Start Learning",
     description:
-      "Subscribe to a plan and begin a structured journey through Quran with weekly progress.",
+      "Join your live 1-on-1 class via video. Learn from the comfort of your home.",
+  },
+  {
+    number: "04",
+    icon: TrendingUp,
+    title: "Track Progress",
+    description:
+      "Get regular feedback, track your Quran journey, and level up at your own pace.",
   },
 ];
 
@@ -44,7 +57,7 @@ export function HowItWorks() {
               How it works
             </span>
             <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-              Start learning in 3 simple steps
+              Start learning in 4 simple steps
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               From signup to your first ayah — get going in minutes.
@@ -58,7 +71,7 @@ export function HowItWorks() {
             className="absolute left-12 right-12 top-9 hidden h-0.5 bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0 lg:block"
           />
 
-          <div className="grid gap-10 lg:grid-cols-3 lg:gap-8">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             {STEPS.map((step, i) => (
               <Reveal key={step.number} delay={i * 0.1}>
                 <StepCard step={step} />

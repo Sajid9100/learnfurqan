@@ -221,7 +221,7 @@ function DetailRow({
 function StatusBadge({ status }: { status: TeacherApplication["status"] }) {
   const styles: Record<TeacherApplication["status"], string> = {
     pending: "bg-accent/15 text-accent-700",
-    approved: "bg-emerald-100 text-emerald-700",
+    approved: "bg-[#e8efec] text-[#0a2e1e]",
     rejected: "bg-red-100 text-red-700",
   };
   return (

@@ -3,7 +3,6 @@
 import {
   Video,
   UserCheck,
-  Sparkles,
   CalendarClock,
   LineChart,
   Gamepad2,
@@ -30,13 +29,6 @@ const FEATURES: Feature[] = [
     description:
       "Verified female teachers for sisters and young girls who prefer same-gender instruction.",
     icon: UserCheck,
-  },
-  {
-    title: "AI Tajweed Assistance",
-    description:
-      "Real-time pronunciation feedback to perfect your recitation between classes.",
-    icon: Sparkles,
-    badge: "Coming Soon",
   },
   {
     title: "Flexible Scheduling",

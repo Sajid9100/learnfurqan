@@ -704,6 +704,67 @@ function renderSubscriptionPaymentFailedEmailText(
   ].join("\n");
 }
 
+// ---------------------------------------------------------------------------
+// Support contact form
+// ---------------------------------------------------------------------------
+export type SupportMessagePayload = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
+
+export async function sendSupportMessage(payload: SupportMessagePayload) {
+  if (!isEmailConfigured) {
+    console.warn("[email] RESEND_API_KEY not set — skipping support email.");
+    return { sent: false };
+  }
+  const resend = getResend();
+  const recipient = isAdminEmailConfigured ? adminAddress : payload.email;
+  const result = await resend.emails.send({
+    from: fromAddress,
+    to: recipient,
+    replyTo: payload.email,
+    subject: `[Support] ${payload.subject} — ${payload.name}`,
+    html: renderSupportEmail(payload),
+    text: renderSupportEmailText(payload),
+  });
+  return { sent: !result.error };
+}
+
+function renderSupportEmail(p: SupportMessagePayload): string {
+  return `
+  <div style="font-family:Inter,system-ui,sans-serif;background:#F8FAF9;padding:32px;color:#0F172A">
+    <table cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #E2E8E5">
+      <tr><td style="padding:24px">
+        <h2 style="margin:0 0 16px;font-family:Poppins,system-ui,sans-serif;color:#0F766E;font-size:20px">New support message</h2>
+        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">
+          ${row("From", escapeHtml(p.name))}
+          ${row("Email", escapeHtml(p.email))}
+          ${row("Subject", escapeHtml(p.subject))}
+        </table>
+        <p style="margin:16px 0 8px;font-size:13px;font-weight:600;color:#64748B">Message</p>
+        <div style="padding:16px;background:#F8FAF9;border-radius:12px;font-size:14px;line-height:1.6;white-space:pre-wrap">${escapeHtml(
+          p.message
+        )}</div>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function renderSupportEmailText(p: SupportMessagePayload): string {
+  return [
+    `New support message`,
+    ``,
+    `From:    ${p.name}`,
+    `Email:   ${p.email}`,
+    `Subject: ${p.subject}`,
+    ``,
+    `Message:`,
+    p.message,
+  ].join("\n");
+}
+
 // Renders an ISO timestamp as a human-readable string in UTC. Falls back to
 // the raw input for legacy free-text slots (e.g. "Mon 9am UTC").
 function formatSlot(raw: string): string {

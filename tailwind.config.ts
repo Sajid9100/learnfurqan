@@ -19,40 +19,36 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // Single primary color: a clean, modern green. 60-30-10 means
-        // primary appears in ~10% of the UI as the CTA / highlight.
+        // 30% — deep green: navbars, headings, dark UI
         primary: {
-          DEFAULT: "#0F766E",
-          50: "#ECFDF5",
-          100: "#D1FAE5",
-          200: "#A7F3D0",
-          300: "#6EE7B7",
-          400: "#34D399",
-          500: "#10B981",
-          600: "#0F766E",
-          700: "#0D6661",
-          800: "#0B524E",
-          900: "#083E3B",
+          DEFAULT: "#0a2e1e",
+          50: "#e8efec",
+          100: "#c8d8d1",
+          200: "#9bb6a8",
+          300: "#6e937e",
+          400: "#427054",
+          500: "#1f4d33",
+          600: "#0a2e1e",
+          700: "#082619",
+          800: "#061c13",
+          900: "#04130d",
         },
-        // Accent is intentionally another shade of the same green family — no
-        // second hue. Existing components reference `accent` for badges,
-        // ratings, and pending states; remapping (rather than deleting) keeps
-        // them rendering in-palette.
+        // 10% — gold accent: highlights, badges, CTAs
         accent: {
-          DEFAULT: "#0D6661",
-          50: "#ECFDF5",
-          100: "#D1FAE5",
-          200: "#A7F3D0",
-          300: "#6EE7B7",
-          400: "#34D399",
-          500: "#10B981",
-          600: "#0D6661",
-          700: "#0B524E",
+          DEFAULT: "#c9a84c",
+          50: "#fbf6e7",
+          100: "#f4e7b9",
+          200: "#ecd388",
+          300: "#e0bf5d",
+          400: "#d5b352",
+          500: "#c9a84c",
+          600: "#a98a3a",
+          700: "#856c2a",
         },
         // 60% — page background
         background: "#FFFFFF",
-        // 30% — text + dark UI; near-black for high contrast
-        foreground: "#0A0F1A",
+        // text + dark UI
+        foreground: "#0a2e1e",
         muted: {
           DEFAULT: "#F4F6F5",
           foreground: "#475569",
@@ -60,7 +56,8 @@ const config: Config = {
         border: "#E2E8E5",
       },
       fontFamily: {
-        heading: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        heading: ["var(--font-inter)", "system-ui", "sans-serif"],
         body: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       keyframes: {
@@ -78,9 +75,9 @@ const config: Config = {
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
       boxShadow: {
-        soft: "0 4px 24px -4px rgba(15, 118, 110, 0.08)",
-        card: "0 8px 32px -8px rgba(15, 23, 42, 0.08)",
-        glow: "0 0 0 4px rgba(15, 118, 110, 0.12)",
+        soft: "0 4px 24px -4px rgba(10, 46, 30, 0.08)",
+        card: "0 8px 32px -8px rgba(10, 46, 30, 0.10)",
+        glow: "0 0 0 4px rgba(10, 46, 30, 0.12)",
       },
     },
   },

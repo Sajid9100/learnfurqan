@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Play, Star, Video, Sparkles } from "lucide-react";
+import { Star, Video, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 
 export function HeroSection() {
@@ -49,15 +49,16 @@ export function HeroSection() {
                 Browse Teachers
               </Button>
             </Link>
-            <Button variant="outline" size="xl">
-              <Play className="h-4 w-4 fill-primary" />
-              Watch How It Works
-            </Button>
+            <Link href="/how-it-works" className="contents">
+              <Button variant="primary" size="xl" className="shadow-glow">
+                How It Works
+              </Button>
+            </Link>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center -space-x-2">
-              {["#0F766E", "#D4A017", "#14B8A6", "#0D6661"].map((c, i) => (
+              {["#0a2e1e", "#c9a84c", "#1f4d33", "#a98a3a"].map((c, i) => (
                 <div
                   key={i}
                   className="h-9 w-9 rounded-full border-2 border-white"

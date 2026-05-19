@@ -1080,11 +1080,10 @@ function StepSubjects(props: {
               </span>
               <div className="flex flex-1 items-start gap-3">
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl shadow-inner"
-                  style={{ backgroundColor: c.color }}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0a2e1e] text-[#c9a84c] shadow-inner"
                   aria-hidden
                 >
-                  <span className="leading-none">{c.emoji}</span>
+                  <c.Icon className="h-6 w-6" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-foreground">
@@ -1516,7 +1515,8 @@ function StepVideo(props: {
           </p>
         </div>
         <Button type="button" variant="ghost" onClick={onSkip}>
-          Skip for now →
+          Skip for now
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
 
@@ -1993,11 +1993,21 @@ function StepPricing(props: {
         />
         <div className="text-sm text-foreground">
           I agree to LearnFurqan&apos;s{" "}
-          <a href="#" className="font-semibold text-primary hover:underline">
+          <a
+            href="/terms-of-service"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-primary hover:underline"
+          >
             Teacher Terms &amp; Conditions
           </a>{" "}
           and{" "}
-          <a href="#" className="font-semibold text-primary hover:underline">
+          <a
+            href="/terms-of-service#code-of-conduct"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-primary hover:underline"
+          >
             Code of Conduct
           </a>
           . I confirm all information above is accurate.

@@ -383,11 +383,11 @@ function VideoIntro({ url }: { url: string }) {
         <PlayCircle className="h-7 w-7" />
       </div>
       <p className="mt-3 font-heading text-base font-semibold text-foreground">
-        Video introduction coming soon
+        No video introduction yet
       </p>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        This teacher hasn’t uploaded a video introduction yet. Book a free
-        trial to meet them live.
+        This teacher hasn&rsquo;t uploaded an intro video. Book a free trial
+        to meet them live.
       </p>
     </div>
   );

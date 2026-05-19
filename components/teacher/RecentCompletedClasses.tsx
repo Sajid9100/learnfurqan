@@ -44,7 +44,7 @@ export function RecentCompletedClasses({
               </div>
               <div className="flex items-center gap-2">
                 {hasNote && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e8efec] px-2.5 py-0.5 text-[11px] font-medium text-[#0a2e1e]">
                     <FileText className="h-3 w-3" />
                     Note added
                   </span>

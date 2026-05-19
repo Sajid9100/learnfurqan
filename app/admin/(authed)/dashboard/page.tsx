@@ -246,7 +246,7 @@ function StatusBadge({ status }: { status: Booking["status"] }) {
   const styles: Record<Booking["status"], string> = {
     pending: "bg-accent/15 text-accent-700",
     confirmed: "bg-primary/15 text-primary",
-    completed: "bg-emerald-100 text-emerald-700",
+    completed: "bg-[#e8efec] text-[#0a2e1e]",
     cancelled: "bg-red-100 text-red-700",
   };
   return (

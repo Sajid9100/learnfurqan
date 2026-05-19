@@ -2,14 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Playfair_Display } from "next/font/google";
+import { ArrowRight, ChevronDown, Search } from "lucide-react";
 import { CATEGORIES, CATEGORY_TAGS } from "@/lib/categories";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  display: "swap",
-});
 
 const TAGS = CATEGORY_TAGS;
 
@@ -75,7 +69,7 @@ export function CategoriesSection() {
             What would you like to learn?
           </span>
           <h2
-            className={`${playfair.className} mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl`}
+            className="mt-5 font-heading text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl"
           >
             Explore Our{" "}
             <span
@@ -88,7 +82,7 @@ export function CategoriesSection() {
               Islamic Programs
             </span>
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-emerald-50/70 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
             From complete beginners to advanced learners — find the perfect
             teacher for your journey
           </p>
@@ -98,26 +92,13 @@ export function CategoriesSection() {
             onSubmit={(e) => e.preventDefault()}
             className="mx-auto mt-8 flex w-full max-w-2xl items-center gap-1.5 rounded-full border border-[#c9a84c]/25 bg-white/[0.06] p-1.5 pl-4 backdrop-blur-sm transition-colors focus-within:border-[#c9a84c]/70 focus-within:bg-white/[0.09]"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4 shrink-0 text-[#c9a84c]"
-              aria-hidden
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
+            <Search aria-hidden className="h-4 w-4 shrink-0 text-[#c9a84c]" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search a subject e.g. Tajweed, Hifz..."
-              className="flex-1 bg-transparent px-2 py-2 text-sm text-white placeholder-emerald-50/40 outline-none"
+              className="flex-1 bg-transparent px-2 py-2 text-sm text-white placeholder-white/40 outline-none"
               aria-label="Search programs"
             />
             <button
@@ -145,7 +126,7 @@ export function CategoriesSection() {
                   className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     active
                       ? "border-[#c9a84c] bg-[#c9a84c] text-[#0a2e1e] shadow-[0_4px_16px_-4px_rgba(201,168,76,0.5)]"
-                      : "border-[#c9a84c]/25 text-emerald-50/75 hover:border-[#c9a84c]/60 hover:text-white"
+                      : "border-[#c9a84c]/25 text-white/75 hover:border-[#c9a84c]/60 hover:text-white"
                   }`}
                 >
                   {tag}
@@ -180,19 +161,15 @@ export function CategoriesSection() {
                   }}
                 />
 
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-inner transition-transform duration-300 group-hover:scale-110"
-                  style={{ backgroundColor: cat.color }}
-                >
-                  <span className="leading-none">{cat.emoji}</span>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#c9a84c]/40 bg-white/[0.07] text-[#c9a84c] shadow-inner transition-transform duration-300 group-hover:scale-110">
+                  <cat.Icon className="h-6 w-6" />
                 </div>
 
-                <h3
-                  className={`${playfair.className} mt-5 text-xl font-bold text-white`}
-                >
+                <h3 className="mt-5 font-heading text-xl font-bold text-white">
+
                   {cat.name}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-emerald-50/65">
+                <p className="mt-1.5 text-sm leading-relaxed text-white/65">
                   {cat.tagline}
                 </p>
 
@@ -201,19 +178,17 @@ export function CategoriesSection() {
                     <span className="h-1.5 w-1.5 rounded-full bg-[#c9a84c]" />
                     {cat.teachers} teachers available
                   </span>
-                  <span
+                  <ArrowRight
                     aria-hidden
-                    className="text-lg text-[#c9a84c] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                  >
-                    →
-                  </span>
+                    className="h-4 w-4 text-[#c9a84c] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
+                  />
                 </div>
               </Link>
             ))}
           </div>
         ) : (
           <div className="mt-16 text-center">
-            <p className="text-emerald-50/70">
+            <p className="text-white/70">
               No programs match{" "}
               <span className="text-white">&ldquo;{query}&rdquo;</span>. Try a
               different search.
@@ -242,14 +217,12 @@ export function CategoriesSection() {
               {expanded
                 ? "Show less"
                 : `Show ${filtered.length - VISIBLE_INITIAL} more programs`}
-              <span
+              <ChevronDown
                 aria-hidden
-                className={`transition-transform duration-300 ${
+                className={`h-4 w-4 transition-transform duration-300 ${
                   expanded ? "rotate-180" : ""
                 }`}
-              >
-                ↓
-              </span>
+              />
             </button>
           </div>
         )}
@@ -271,9 +244,8 @@ export function CategoriesSection() {
             }}
           />
           <div className="relative md:max-w-xl">
-            <h3
-              className={`${playfair.className} text-2xl font-bold leading-tight sm:text-3xl`}
-            >
+            <h3 className="font-heading text-2xl font-bold leading-tight sm:text-3xl">
+
               <span
                 className="bg-clip-text text-transparent"
                 style={{
@@ -284,7 +256,7 @@ export function CategoriesSection() {
                 Can&rsquo;t find what you&rsquo;re looking for?
               </span>
             </h3>
-            <p className="mt-2 text-sm text-emerald-50/70 sm:text-base">
+            <p className="mt-2 text-sm text-white/70 sm:text-base">
               Browse all 1,200+ verified Quran &amp; Islamic teachers
             </p>
           </div>
@@ -297,7 +269,7 @@ export function CategoriesSection() {
             }}
           >
             Browse All Teachers
-            <span aria-hidden>→</span>
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>
       </div>

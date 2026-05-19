@@ -64,7 +64,7 @@ export function UpcomingBookings({ bookings }: { bookings: Booking[] }) {
                 <p className="text-xs text-muted-foreground">
                   {formatBookingSlot(b.selected_slot)}
                   {b.payment_status === "paid" && (
-                    <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                    <span className="ml-2 inline-flex items-center rounded-full bg-[#e8efec] px-2 py-0.5 text-[10px] font-medium text-[#0a2e1e]">
                       Paid
                     </span>
                   )}

@@ -1,6 +1,5 @@
 "use client";
 
-import { Instagram, Facebook, Youtube, Twitter } from "lucide-react";
 import { Logo } from "./ui/Logo";
 
 const COLUMNS: {
@@ -13,36 +12,32 @@ const COLUMNS: {
       { label: "How it Works", href: "/how-it-works" },
       { label: "Courses", href: "/courses" },
       { label: "Browse Teachers", href: "/teachers" },
-      { label: "Free Trial", href: "/teachers" },
+      { label: "For Parents", href: "/for-parents" },
     ],
   },
   {
     title: "For Teachers",
     links: [
       { label: "Become a Teacher", href: "/become-a-teacher" },
-      { label: "Teacher Dashboard", href: "/teacher" },
+      { label: "Apply to Teach", href: "/become-a-teacher/apply" },
       { label: "FAQ", href: "/faq" },
     ],
   },
   {
-    title: "Resources",
+    title: "Programs",
     links: [
-      { label: "Blog", href: "#" },
-      { label: "Community", href: "#" },
-      { label: "Tajweed Guide", href: "/categories/tajweed" },
+      { label: "Tajweed", href: "/categories/tajweed" },
+      { label: "Hifz", href: "/categories/hifz-program" },
+      { label: "Kids", href: "/categories/kids-program" },
     ],
   },
   {
     title: "Contact",
-    links: [{ label: "Support", href: "/support" }],
+    links: [
+      { label: "Support", href: "/support" },
+      { label: "FAQ", href: "/faq" },
+    ],
   },
-];
-
-const SOCIALS = [
-  { icon: Instagram, label: "Instagram", href: "#" },
-  { icon: Facebook, label: "Facebook", href: "#" },
-  { icon: Youtube, label: "YouTube", href: "#" },
-  { icon: Twitter, label: "Twitter", href: "#" },
 ];
 
 export function Footer() {
@@ -55,18 +50,6 @@ export function Footer() {
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Connecting students with Quran teachers worldwide.
             </p>
-            <div className="mt-6 flex items-center gap-2">
-              {SOCIALS.map(({ icon: Icon, label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8">
